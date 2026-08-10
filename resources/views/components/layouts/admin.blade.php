@@ -148,6 +148,17 @@
                         <i class="fa-solid fa-chevron-right text-xs"></i>
                     @endif
                 </a>
+
+                <!-- 9. Leaderboard -->
+                <a href="{{ route('admin.leaderboard') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.leaderboard') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-trophy text-base w-5 text-center"></i>
+                        <span>Leaderboard Member</span>
+                    </div>
+                    @if(request()->routeIs('admin.leaderboard'))
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    @endif
+                </a>
             </nav>
 
             <!-- Bottom Section: Admin User & Links -->

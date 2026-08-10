@@ -5,6 +5,7 @@ use App\Enums\UnitStatus;
 use App\Http\Controllers\Admin\OperationsController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\PortalController;
 use App\Models\Category;
 use App\Models\Combo;
@@ -52,6 +53,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/history', [PortalController::class, 'history'])->name('history');
     Route::get('/profile', [PortalController::class, 'profile'])->name('profile');
     Route::put('/profile', [PortalController::class, 'updateProfile']);
+    Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard');
 });
 
 Route::get('/catalogue', [PortalController::class, 'catalogue'])->name('catalogue');
@@ -67,6 +69,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/deliveries', [OperationsController::class, 'deliveries'])->name('admin.deliveries');
     Route::get('/history', [OperationsController::class, 'history'])->name('admin.history');
     Route::get('/history/print', [OperationsController::class, 'printHistory'])->name('admin.history.print');
+    Route::get('/leaderboard', [LeaderboardController::class, 'adminIndex'])->name('admin.leaderboard');
 
     // Operations Actions
     Route::post('/units', [OperationsController::class, 'storeUnit']);

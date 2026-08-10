@@ -48,8 +48,12 @@
                             <span>Rental Aktif</span>
                         </a>
                         <a href="{{ route('history') }}" class="inline-flex items-center gap-2 rounded-lg px-3.5 py-2 transition hover:bg-white/5 hover:text-white {{ request()->routeIs('history') ? 'bg-orange-500/10 text-orange-400 font-semibold' : '' }}">
-                            <i class="fa-solid fa-trophy text-xs"></i>
+                            <i class="fa-solid fa-file-invoice text-xs"></i>
                             <span>Riwayat & Rank</span>
+                        </a>
+                        <a href="{{ route('leaderboard') }}" class="inline-flex items-center gap-2 rounded-lg px-3.5 py-2 transition hover:bg-white/5 hover:text-white {{ request()->routeIs('leaderboard') ? 'bg-orange-500/10 text-orange-400 font-semibold' : '' }}">
+                            <i class="fa-solid fa-trophy text-xs"></i>
+                            <span>Leaderboard</span>
                         </a>
                     @endif
 
