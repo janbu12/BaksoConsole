@@ -18,22 +18,43 @@ class AdminDashboardQuery
     {
         $popularUnit = Unit::withCount('rentals')->orderByDesc('rentals_count')->first();
         $activeMember = User::where('role', 'user')->withCount('rentals')->orderByDesc('rentals_count')->first();
+        
         $deliveries = Delivery::selectRaw('method, count(*) as total')->groupBy('method')->pluck('total', 'method');
+        $totalDeliveries = $deliveries->sum();
+        $pickupCount = (int) ($deliveries->get('pickup') ?? 0);
+        $deliveryCount = (int) ($deliveries->get('delivery') ?? 0);
+        
+        $pickupPercent = $totalDeliveries > 0 ? round(($pickupCount / $totalDeliveries) * 100) : 50;
+        $deliveryPercent = $totalDeliveries > 0 ? round(($deliveryCount / $totalDeliveries) * 100) : 50;
+
+        $heatmapRaw = Rental::selectRaw('start_date, count(*) as total, sum(duration_days) as total_days')
+            ->groupBy('start_date')
+            ->orderBy('start_date')
+            ->get();
+
+        // Identify peak rental period
+        $peakDay = $heatmapRaw->sortByDesc('total')->first();
 
         return [
             'stats' => [
-                'Total rental' => Rental::count(),
-                'Unit aktif disewa' => Rental::whereIn('status', [RentalStatus::Active, RentalStatus::Overdue])->count(),
-                'Unit tersedia' => Unit::where('status', UnitStatus::Available)->count(),
-                'Total anggota' => User::where('role', 'user')->count(),
-                'Total hari sewa' => Rental::sum('duration_days'),
-                'Total transaksi' => Transaction::where('status', PaymentStatus::Paid)->sum('total_amount'),
-                'Total denda' => Fine::sum('amount'),
+                'Total Rental' => Rental::count(),
+                'Unit Aktif Disewa' => Rental::whereIn('status', [RentalStatus::Active, RentalStatus::Overdue])->count(),
+                'Unit Tersedia' => Unit::where('status', UnitStatus::Available)->count(),
+                'Total Anggota' => User::where('role', 'user')->count(),
+                'Total Hari Sewa' => (int) Rental::sum('duration_days'),
+                'Total Pendapatan' => (float) Transaction::where('status', PaymentStatus::Paid)->sum('total_amount'),
+                'Total Denda' => (float) Fine::sum('amount'),
             ],
             'popularUnit' => $popularUnit,
             'activeMember' => $activeMember,
-            'deliveryMix' => $deliveries,
-            'heatmap' => Rental::selectRaw('start_date, count(*) as total')->groupBy('start_date')->orderBy('start_date')->get(),
+            'deliveryMix' => [
+                'pickup' => $pickupCount,
+                'delivery' => $deliveryCount,
+                'pickup_percent' => $pickupPercent,
+                'delivery_percent' => $deliveryPercent,
+            ],
+            'heatmap' => $heatmapRaw,
+            'peakDay' => $peakDay,
         ];
     }
 }
