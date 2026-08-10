@@ -15,14 +15,14 @@ Total 24 fitur (23 fitur awal + Pickup & Delivery) dibagi menjadi dua peran:
 
 | Peran | Fokus |
 |---|---|
-| **Person A** | Alur transaksi inti: Auth, Member, Unit, Kategori, Booking, Rental, Return, Transaction |
-| **Person B** | Pengalaman pengguna & fitur pendukung: Search, Availability, Timer/Warning, SmartPick, Mabar Capacity, Rank, Combo, Analytics, Heatmap, History, Delivery |
+| **Mizan** | Alur transaksi inti: Auth, Member, Unit, Kategori, Booking, Rental, Return, Transaction |
+| **Nable** | Pengalaman pengguna & fitur pendukung: Search, Availability, Timer/Warning, SmartPick, Mabar Capacity, Rank, Combo, Analytics, Heatmap, History, Delivery |
 
 ---
 
 ## 2. Pembagian Tugas per Modul
 
-### 👤 Person A — "Core Transaction & Data Owner"
+### 👤 Mizan — "Core Transaction & Data Owner"
 
 | No | Fitur (dari PRD) | Detail Tugas |
 |---|---|---|
@@ -42,7 +42,7 @@ Total 24 fitur (23 fitur awal + Pickup & Delivery) dibagi menjadi dua peran:
 
 ---
 
-### 👤 Person B — "Experience & Insight Owner"
+### 👤 Nable — "Experience & Insight Owner"
 
 | No | Fitur (dari PRD) | Detail Tugas |
 |---|---|---|
@@ -59,9 +59,9 @@ Total 24 fitur (23 fitur awal + Pickup & Delivery) dibagi menjadi dua peran:
 | 20 | Rental History | Riwayat penyewaan (admin: semua, user: milik sendiri) + cetak |
 | 24 | Pickup & Delivery Service *(fitur baru)* | Pilihan ambil di tempat/diantar, assign kurir, status pengantaran |
 
-**Tabel yang dimiliki:** `deliveries`, serta view/agregasi untuk analytics & heatmap (bisa query dari tabel Person A).
+**Tabel yang dimiliki:** `deliveries`, serta view/agregasi untuk analytics & heatmap (bisa query dari tabel Mizan).
 
-> ⚠️ Catatan: modul Person B banyak yang **bergantung pada data dari modul Person A** (rentals, transactions). Maka urutan pengerjaan Sprint 1 penting — lihat bagian 3.
+> ⚠️ Catatan: modul Nable banyak yang **bergantung pada data dari modul Mizan** (rentals, transactions). Maka urutan pengerjaan Sprint 1 penting — lihat bagian 3.
 
 ---
 
@@ -71,7 +71,7 @@ Total 24 fitur (23 fitur awal + Pickup & Delivery) dibagi menjadi dua peran:
 
 Tujuan: **alur utama end-to-end bisa didemokan** — login → cari/lihat unit → booking → rental → kembalikan unit — tanpa fitur "manis" dulu.
 
-| Person A | Person B |
+| Mizan | Nable |
 |---|---|
 | Authentication & Role Management | Console Search (dasar) |
 | Console Unit Management + Multiple Category | Live Console Availability (status dasar) |
@@ -93,7 +93,7 @@ Tujuan: **alur utama end-to-end bisa didemokan** — login → cari/lihat unit �
 
 ### 🚀 Sprint 2 — "Selling Point & Diferensiasi"
 
-| Person A | Person B |
+| Mizan | Nable |
 |---|---|
 | Rental Extension | Smart Rental Recommendation (SmartPick) |
 | Refinement Transaction (denda, perhitungan lebih detail) | Mabar Capacity |
@@ -106,7 +106,7 @@ Tujuan: **alur utama end-to-end bisa didemokan** — login → cari/lihat unit �
 
 ### 📊 Sprint 3 — "Business Insight & Layanan Tambahan"
 
-| Person A | Person B |
+| Mizan | Nable |
 |---|---|
 | Support data untuk Analytics (pastikan data transaksi lengkap & akurat) | Rental Analytics (Bakso Insight) |
 | — | Rental Heatmap |
