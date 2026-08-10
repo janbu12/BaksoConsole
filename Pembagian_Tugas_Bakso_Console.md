@@ -20,7 +20,25 @@ Total 24 fitur (23 fitur awal + Pickup & Delivery) dibagi menjadi dua peran:
 
 ---
 
-## 2. Pembagian Tugas per Modul
+## 2. Fondasi Data Bersama (Sebelum Pembagian Fitur)
+
+Model, enum, dan migration awal diselesaikan terlebih dahulu sebagai **shared foundation**. Fondasi ini bukan kepemilikan individual Mizan atau Nable. Keduanya wajib menggunakan nama tabel, kolom, relasi Eloquent, cast, dan enum status yang sudah tersedia.
+
+Aturan kerja fondasi data:
+
+- Jangan mengubah migration awal yang sudah dipakai bersama setelah feature branch mulai berjalan.
+- Kebutuhan schema baru harus didiskusikan dan dibuat sebagai migration tambahan.
+- Jangan membuat model atau enum kedua untuk data/status yang sama.
+- Perubahan relasi model harus diselaraskan dengan kedua modul yang menggunakannya.
+- Analytics, heatmap, history, rank, timer, warning, dan availability dihitung dari tabel transaksi bersama; tidak membuat tabel salinan.
+
+Model bersama yang tersedia: `User`, `Profile`, `Unit`, `Category`, `Combo`, `Booking`, `Rental`, `RentalExtension`, `Fine`, `Delivery`, dan `Transaction`.
+
+Tabel bersama yang tersedia: `users`, `profiles`, `units`, `categories`, `category_unit`, `combos`, `bookings`, `rentals`, `rental_extensions`, `fines`, `deliveries`, dan `transactions`.
+
+---
+
+## 3. Pembagian Tugas per Modul
 
 ### 👤 Mizan — "Core Transaction & Data Owner"
 
@@ -36,9 +54,9 @@ Total 24 fitur (23 fitur awal + Pickup & Delivery) dibagi menjadi dua peran:
 | 16 | Return Management | Proses pengembalian oleh Admin, hitung denda |
 | 17 | Transaction Management | Pencatatan transaksi (sewa, denda, total bayar) |
 | 21 | Validation System | Validasi lintas modul (field wajib, tanggal, kode unik, dst) |
-| 22–23 | Database Migration & Seeder | Struktur tabel inti + seeder awal |
+| 23 | Database Seeder | Seeder admin, kategori, unit, dan data uji memakai model bersama |
 
-**Tabel yang dimiliki:** `users`, `profiles`, `units`, `categories`, `category_unit`, `bookings`, `rentals`, `transactions`, `fines`, `rental_extensions`
+**Model yang digunakan:** `User`, `Profile`, `Unit`, `Category`, `Booking`, `Rental`, `RentalExtension`, `Fine`, dan `Transaction`. Struktur model dan tabel tetap menjadi fondasi bersama.
 
 ---
 
@@ -59,13 +77,13 @@ Total 24 fitur (23 fitur awal + Pickup & Delivery) dibagi menjadi dua peran:
 | 20 | Rental History | Riwayat penyewaan (admin: semua, user: milik sendiri) + cetak |
 | 24 | Pickup & Delivery Service *(fitur baru)* | Pilihan ambil di tempat/diantar, assign kurir, status pengantaran |
 
-**Tabel yang dimiliki:** `deliveries`, serta view/agregasi untuk analytics & heatmap (bisa query dari tabel Mizan).
+**Model yang digunakan:** `Unit`, `Category`, `Combo`, `Rental`, `Fine`, `Delivery`, dan `Transaction`. Analytics dan heatmap menggunakan query/agregasi dari tabel bersama.
 
-> ⚠️ Catatan: modul Nable banyak yang **bergantung pada data dari modul Mizan** (rentals, transactions). Maka urutan pengerjaan Sprint 1 penting — lihat bagian 3.
+> ⚠️ Catatan: modul Nable banyak yang **bergantung pada data dari modul Mizan** (rentals, transactions). Maka urutan pengerjaan Sprint 1 penting — lihat bagian 4.
 
 ---
 
-## 3. Sprint Plan
+## 4. Sprint Plan
 
 ### 🏁 Sprint 1 — "Core Flow Harus Jalan Mulus" (Prioritas Demo)
 
@@ -80,7 +98,7 @@ Tujuan: **alur utama end-to-end bisa didemokan** — login → cari/lihat unit �
 | Rental Management (max 2 unit, max 5 hari) | Smart Rental Timer (sisa hari) |
 | Return Management (proses admin, hitung denda dasar) | Rental Warning System (🟢🟡🔴) |
 | Transaction Management (dasar) | Rental History (tampilan sederhana) |
-| Database Migration + Seeder | — |
+| Database Seeder memakai shared foundation | Verifikasi query fitur terhadap shared foundation |
 | Validation System (validasi inti) | — |
 
 **Definition of Done Sprint 1:**
@@ -117,7 +135,7 @@ Tujuan: **alur utama end-to-end bisa didemokan** — login → cari/lihat unit �
 
 ---
 
-## 4. Ringkasan Prioritas
+## 5. Ringkasan Prioritas
 
 ```text
 Sprint 1  →  CORE FLOW (wajib demo mulus)
