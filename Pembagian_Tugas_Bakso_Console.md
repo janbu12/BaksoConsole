@@ -79,7 +79,7 @@ Tabel bersama yang tersedia: `users`, `profiles`, `units`, `categories`, `catego
 
 **Model yang digunakan:** `Unit`, `Category`, `Combo`, `Rental`, `Fine`, `Delivery`, dan `Transaction`. Analytics dan heatmap menggunakan query/agregasi dari tabel bersama.
 
-> ⚠️ Catatan: modul Nable banyak yang **bergantung pada data dari modul Mizan** (rentals, transactions). Maka urutan pengerjaan Sprint 1 penting — lihat bagian 3.
+> ⚠️ Catatan: modul Nable banyak yang **bergantung pada data dari modul Mizan** (rentals, transactions). Maka urutan pengerjaan Sprint 1 penting — lihat bagian 4.
 
 ---
 
