@@ -8,6 +8,7 @@
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700,800|plus-jakarta-sans:400,500,600,700,800" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', 'Instrument Sans', sans-serif; }
     </style>
@@ -157,6 +158,23 @@
                     </div>
                     @if(request()->routeIs('admin.leaderboard'))
                         <i class="fa-solid fa-chevron-right text-xs"></i>
+                    @endif
+                </a>
+
+                <div class="pt-4 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                    Sistem & Pemantauan
+                </div>
+
+                <!-- 10. System & Resource Monitor -->
+                <a href="{{ route('admin.resources') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.resources') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-microchip text-base w-5 text-center"></i>
+                        <span>Resource & Server Monitor</span>
+                    </div>
+                    @if(request()->routeIs('admin.resources'))
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    @else
+                        <span class="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
                     @endif
                 </a>
             </nav>

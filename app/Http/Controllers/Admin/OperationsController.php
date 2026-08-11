@@ -26,6 +26,8 @@ use App\Models\Transaction;
 use App\Models\Unit;
 use App\Models\User;
 use App\Queries\AdminDashboardQuery;
+use App\Services\SystemResourceService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -485,5 +487,17 @@ class OperationsController extends Controller
         ]);
 
         return back()->with('success', implode(' & ', $parts) . " untuk Rental #{$rental->rental_code} telah dikonfirmasi.");
+    }
+
+    public function resources(SystemResourceService $systemResource): View
+    {
+        $metrics = $systemResource->getAllMetrics();
+
+        return view('admin.resources', compact('metrics'));
+    }
+
+    public function resourceMetrics(SystemResourceService $systemResource): JsonResponse
+    {
+        return response()->json($systemResource->getAllMetrics());
     }
 }

@@ -12,6 +12,7 @@
         "php": "^8.3",
         "dompdf/dompdf": "^3.1.6",
         "laravel/framework": "^13.8",
+        "laravel/pulse": "*",
         "laravel/tinker": "^3.0"
     },
     "require-dev": {

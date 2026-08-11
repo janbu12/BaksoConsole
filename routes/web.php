@@ -83,6 +83,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/history', [OperationsController::class, 'history'])->name('admin.history');
     Route::get('/history/print', [OperationsController::class, 'printHistory'])->name('admin.history.print');
     Route::get('/leaderboard', [LeaderboardController::class, 'adminIndex'])->name('admin.leaderboard');
+    Route::get('/resources', [OperationsController::class, 'resources'])->name('admin.resources');
+    Route::get('/resources/metrics', [OperationsController::class, 'resourceMetrics'])->name('admin.resources.metrics');
 
     // Operations Actions
     Route::post('/units', [OperationsController::class, 'storeUnit']);

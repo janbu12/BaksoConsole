@@ -132,6 +132,7 @@ class MidtransService
         ];
 
         $response = Http::withBasicAuth($this->serverKey, '')
+            ->withoutVerifying()
             ->acceptJson()
             ->asJson()
             ->timeout(15)
