@@ -10,7 +10,7 @@
                 </p>
             </div>
             <div>
-                <button @click="$dispatch('open-modal', 'add-unit-modal')" type="button" class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#f95721] to-amber-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-orange-500/25 hover:brightness-110 active:scale-95 transition cursor-pointer">
+                <button onclick="openModal('add-unit-modal')" type="button" class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#f95721] to-amber-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-orange-500/25 hover:brightness-110 active:scale-95 transition cursor-pointer">
                     <i class="fa-solid fa-plus text-xs"></i>
                     <span>Tambah Unit Konsol Baru</span>
                 </button>
@@ -127,7 +127,7 @@
                                 <td class="p-4 text-right">
                                     <div class="flex items-center justify-end gap-2">
                                         <!-- Edit Modal Trigger Button -->
-                                        <button @click="$dispatch('open-modal', 'edit-unit-{{ $unit->id }}')" type="button" title="Edit Unit & Game" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 p-2 text-slate-700 dark:text-slate-300 hover:border-orange-500 hover:text-[#f95721] transition shadow-sm">
+                                        <button onclick="openModal('edit-unit-{{ $unit->id }}')" type="button" title="Edit Unit & Game" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 p-2 text-slate-700 dark:text-slate-300 hover:border-orange-500 hover:text-[#f95721] transition shadow-sm cursor-pointer">
                                             <i class="fa-solid fa-pen-to-square text-xs"></i>
                                         </button>
 
@@ -143,19 +143,19 @@
                                             
                                             @if($unit->status->value === 'available')
                                                 <input type="hidden" name="status" value="maintenance">
-                                                <button type="submit" title="Ubah ke Maintenance" class="rounded-xl bg-red-500/10 border border-red-500/20 px-2.5 py-1 text-[10px] font-bold text-red-600 dark:text-red-400 hover:bg-red-500 hover:text-white transition">
+                                                <button type="submit" title="Ubah ke Maintenance" class="rounded-xl bg-red-500/10 border border-red-500/20 px-2.5 py-1 text-[10px] font-bold text-red-600 dark:text-red-400 hover:bg-red-500 hover:text-white transition cursor-pointer">
                                                     Set Service
                                                 </button>
                                             @elseif($unit->status->value === 'maintenance')
                                                 <input type="hidden" name="status" value="available">
-                                                <button type="submit" title="Aktifkan Kembali" class="rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white transition">
+                                                <button type="submit" title="Aktifkan Kembali" class="rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white transition cursor-pointer">
                                                     Set Ready
                                                 </button>
                                             @endif
                                         </form>
 
                                         <!-- Delete Modal Trigger Button -->
-                                        <button @click="$dispatch('open-modal', 'delete-unit-{{ $unit->id }}')" type="button" title="Hapus Unit" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 p-2 text-slate-500 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/40 transition">
+                                        <button onclick="openModal('delete-unit-{{ $unit->id }}')" type="button" title="Hapus Unit" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 p-2 text-slate-500 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/40 transition cursor-pointer">
                                             <i class="fa-solid fa-trash-can text-xs"></i>
                                         </button>
                                     </div>
@@ -224,10 +224,10 @@
                                             </div>
 
                                             <div class="pt-2 flex justify-end gap-2">
-                                                <button @click="$dispatch('close-modal', 'edit-unit-{{ $unit->id }}')" type="button" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition">
+                                                <button onclick="closeModal('edit-unit-{{ $unit->id }}')" type="button" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition cursor-pointer">
                                                     Batal
                                                 </button>
-                                                <button type="submit" class="rounded-xl bg-[#f95721] px-5 py-2 text-xs font-bold text-white shadow-md shadow-orange-500/25 hover:brightness-110 transition">
+                                                <button type="submit" class="rounded-xl bg-[#f95721] px-5 py-2 text-xs font-bold text-white shadow-md shadow-orange-500/25 hover:brightness-110 transition cursor-pointer">
                                                     Simpan Perubahan
                                                 </button>
                                             </div>
@@ -244,10 +244,10 @@
                                             <form method="POST" action="/admin/units/{{ $unit->id }}" class="flex justify-end gap-2 pt-2">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button @click="$dispatch('close-modal', 'delete-unit-{{ $unit->id }}')" type="button" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition">
+                                                <button onclick="closeModal('delete-unit-{{ $unit->id }}')" type="button" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition cursor-pointer">
                                                     Batal
                                                 </button>
-                                                <button type="submit" class="rounded-xl bg-red-600 px-5 py-2 text-xs font-bold text-white shadow-md shadow-red-500/25 hover:bg-red-500 transition">
+                                                <button type="submit" class="rounded-xl bg-red-600 px-5 py-2 text-xs font-bold text-white shadow-md shadow-red-500/25 hover:bg-red-500 transition cursor-pointer">
                                                     Hapus Permanent
                                                 </button>
                                             </form>
@@ -279,7 +279,7 @@
                     <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Daftar game resmi yang dapat di-install dan dipasangkan ke unit konsol PlayStation.</p>
                 </div>
                 <div>
-                    <button @click="$dispatch('open-modal', 'add-game-modal')" type="button" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 px-3.5 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:border-orange-500 hover:text-[#f95721] transition shadow-sm cursor-pointer">
+                    <button onclick="openModal('add-game-modal')" type="button" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 px-3.5 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:border-orange-500 hover:text-[#f95721] transition shadow-sm cursor-pointer">
                         <i class="fa-solid fa-plus text-xs"></i>
                         <span>Tambah Game Baru</span>
                     </button>
@@ -300,7 +300,7 @@
                             </div>
                         </div>
 
-                        <button @click="$dispatch('open-modal', 'delete-game-{{ $game->id }}')" type="button" class="text-slate-400 hover:text-red-500 p-1.5 transition" title="Hapus Game">
+                        <button onclick="openModal('delete-game-{{ $game->id }}')" type="button" class="text-slate-400 hover:text-red-500 p-1.5 transition cursor-pointer" title="Hapus Game">
                             <i class="fa-solid fa-xmark text-sm"></i>
                         </button>
 
@@ -313,10 +313,10 @@
                                 <form method="POST" action="/admin/games/{{ $game->id }}" class="flex justify-end gap-2 pt-2">
                                     @csrf
                                     @method('DELETE')
-                                    <button @click="$dispatch('close-modal', 'delete-game-{{ $game->id }}')" type="button" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition">
+                                    <button onclick="closeModal('delete-game-{{ $game->id }}')" type="button" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition cursor-pointer">
                                         Batal
                                     </button>
-                                    <button type="submit" class="rounded-xl bg-red-600 px-5 py-2 text-xs font-bold text-white shadow-md shadow-red-500/25 hover:bg-red-500 transition">
+                                    <button type="submit" class="rounded-xl bg-red-600 px-5 py-2 text-xs font-bold text-white shadow-md shadow-red-500/25 hover:bg-red-500 transition cursor-pointer">
                                         Hapus Game
                                     </button>
                                 </form>
@@ -419,10 +419,10 @@
             </div>
 
             <div class="pt-2 flex justify-end gap-2">
-                <button @click="$dispatch('close-modal', 'add-unit-modal')" type="button" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition">
+                <button onclick="closeModal('add-unit-modal')" type="button" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition cursor-pointer">
                     Batal
                 </button>
-                <button type="submit" class="rounded-xl bg-[#f95721] px-5 py-2 text-xs font-bold text-white shadow-md shadow-orange-500/25 hover:brightness-110 transition">
+                <button type="submit" class="rounded-xl bg-[#f95721] px-5 py-2 text-xs font-bold text-white shadow-md shadow-orange-500/25 hover:brightness-110 transition cursor-pointer">
                     + Simpan Unit Baru
                 </button>
             </div>
@@ -452,10 +452,10 @@
                 <input name="description" type="text" placeholder="Misal: Resolusi 4K 60FPS, Co-op 2P" class="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-950 p-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:border-orange-500 focus:outline-none">
             </div>
             <div class="pt-2 flex justify-end gap-2">
-                <button @click="$dispatch('close-modal', 'add-game-modal')" type="button" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition">
+                <button onclick="closeModal('add-game-modal')" type="button" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition cursor-pointer">
                     Batal
                 </button>
-                <button type="submit" class="rounded-xl bg-[#f95721] px-5 py-2 text-xs font-bold text-white shadow-md shadow-orange-500/25 hover:brightness-110 transition">
+                <button type="submit" class="rounded-xl bg-[#f95721] px-5 py-2 text-xs font-bold text-white shadow-md shadow-orange-500/25 hover:brightness-110 transition cursor-pointer">
                     + Simpan Game
                 </button>
             </div>

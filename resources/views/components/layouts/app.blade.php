@@ -23,7 +23,7 @@
         body { font-family: 'Plus Jakarta Sans', 'Instrument Sans', sans-serif; }
     </style>
 </head>
-<body class="min-h-screen bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 antialiased selection:bg-[#f95721] selection:text-white flex flex-col justify-between transition-colors duration-300">
+<body x-data class="min-h-screen bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 antialiased selection:bg-[#f95721] selection:text-white flex flex-col justify-between transition-colors duration-300">
     
     <div>
         <!-- Top Navbar -->
@@ -219,7 +219,7 @@
         </div>
     </footer>
 
-    <!-- Global Theme Switcher Script -->
+    <!-- Global Utility Scripts (Theme, Modals & Toasts) -->
     <script>
         window.toggleTheme = function() {
             if (document.documentElement.classList.contains('dark')) {
@@ -229,6 +229,18 @@
                 document.documentElement.classList.add('dark');
                 localStorage.theme = 'dark';
             }
+        };
+
+        window.openModal = function(name) {
+            window.dispatchEvent(new CustomEvent('open-modal', { detail: name }));
+        };
+
+        window.closeModal = function(name) {
+            window.dispatchEvent(new CustomEvent('close-modal', { detail: name }));
+        };
+
+        window.showToast = function(detail) {
+            window.dispatchEvent(new CustomEvent('toast', { detail: detail }));
         };
     </script>
 </body>

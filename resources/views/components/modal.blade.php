@@ -20,13 +20,12 @@ $maxWidthClass = match ($maxWidth) {
 @endphp
 
 <div x-data="{ show: false }"
-     x-modelable="show"
      x-show="show"
+     x-cloak
      x-on:close-modal.window="if ($event.detail === '{{ $name }}') show = false"
      x-on:open-modal.window="if ($event.detail === '{{ $name }}') show = true"
      x-on:keydown.escape.window="show = false"
-     class="fixed inset-0 z-50 overflow-y-auto px-4 py-6 sm:px-0"
-     style="display: none;">
+     class="fixed inset-0 z-50 overflow-y-auto px-4 py-6 sm:px-0">
     
     <!-- Backdrop Overlay -->
     <div x-show="show"
@@ -67,7 +66,7 @@ $maxWidthClass = match ($maxWidth) {
                         </div>
                     </div>
 
-                    <button @click="show = false" type="button" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition">
+                    <button @click="show = false" type="button" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition cursor-pointer">
                         <i class="fa-solid fa-xmark text-sm"></i>
                     </button>
                 </div>

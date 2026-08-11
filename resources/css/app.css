@@ -11,6 +11,10 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
+[x-cloak] {
+    display: none !important;
+}
+
 @layer base {
     html {
         color-scheme: light dark;

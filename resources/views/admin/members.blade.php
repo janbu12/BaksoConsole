@@ -10,7 +10,7 @@
                 </p>
             </div>
             <div>
-                <button @click="$dispatch('open-modal', 'add-member-modal')" type="button" class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#f95721] to-amber-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-orange-500/25 hover:brightness-110 active:scale-95 transition cursor-pointer">
+                <button onclick="openModal('add-member-modal')" type="button" class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#f95721] to-amber-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-orange-500/25 hover:brightness-110 active:scale-95 transition cursor-pointer">
                     <i class="fa-solid fa-user-plus text-xs"></i>
                     <span>Tambah Anggota Baru</span>
                 </button>
@@ -68,12 +68,12 @@
 
                     <!-- Edit & Delete Action Modal Triggers -->
                     <div class="mt-5 pt-3 border-t border-slate-200 dark:border-white/10 flex items-center justify-between gap-2">
-                        <button @click="$dispatch('open-modal', 'edit-member-{{ $member->id }}')" type="button" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#f95721] hover:underline cursor-pointer">
+                        <button onclick="openModal('edit-member-{{ $member->id }}')" type="button" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#f95721] hover:underline cursor-pointer">
                             <i class="fa-solid fa-pen-to-square text-xs"></i>
                             <span>Edit Profil Member</span>
                         </button>
 
-                        <button @click="$dispatch('open-modal', 'delete-member-{{ $member->id }}')" type="button" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 p-2 text-slate-500 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/40 transition" title="Hapus Anggota">
+                        <button onclick="openModal('delete-member-{{ $member->id }}')" type="button" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 p-2 text-slate-500 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/40 transition cursor-pointer" title="Hapus Anggota">
                             <i class="fa-solid fa-trash-can text-xs"></i>
                         </button>
                     </div>
@@ -101,10 +101,10 @@
                             </div>
 
                             <div class="pt-2 flex justify-end gap-2">
-                                <button @click="$dispatch('close-modal', 'edit-member-{{ $member->id }}')" type="button" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition">
+                                <button onclick="closeModal('edit-member-{{ $member->id }}')" type="button" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition cursor-pointer">
                                     Batal
                                 </button>
-                                <button type="submit" class="rounded-xl bg-[#f95721] px-5 py-2 text-xs font-bold text-white shadow-md shadow-orange-500/25 hover:brightness-110 transition">
+                                <button type="submit" class="rounded-xl bg-[#f95721] px-5 py-2 text-xs font-bold text-white shadow-md shadow-orange-500/25 hover:brightness-110 transition cursor-pointer">
                                     Simpan Perubahan
                                 </button>
                             </div>
@@ -120,10 +120,10 @@
                             <form method="POST" action="/admin/members/{{ $member->id }}" class="flex justify-end gap-2 pt-2">
                                 @csrf
                                 @method('DELETE')
-                                <button @click="$dispatch('close-modal', 'delete-member-{{ $member->id }}')" type="button" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition">
+                                <button onclick="closeModal('delete-member-{{ $member->id }}')" type="button" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition cursor-pointer">
                                     Batal
                                 </button>
-                                <button type="submit" class="rounded-xl bg-red-600 px-5 py-2 text-xs font-bold text-white shadow-md shadow-red-500/25 hover:bg-red-500 transition">
+                                <button type="submit" class="rounded-xl bg-red-600 px-5 py-2 text-xs font-bold text-white shadow-md shadow-red-500/25 hover:bg-red-500 transition cursor-pointer">
                                     Hapus Member
                                 </button>
                             </form>
@@ -179,10 +179,10 @@
             </div>
 
             <div class="pt-2 flex justify-end gap-2">
-                <button @click="$dispatch('close-modal', 'add-member-modal')" type="button" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition">
+                <button onclick="closeModal('add-member-modal')" type="button" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition cursor-pointer">
                     Batal
                 </button>
-                <button type="submit" class="rounded-xl bg-[#f95721] px-5 py-2 text-xs font-bold text-white shadow-md shadow-orange-500/25 hover:brightness-110 transition">
+                <button type="submit" class="rounded-xl bg-[#f95721] px-5 py-2 text-xs font-bold text-white shadow-md shadow-orange-500/25 hover:brightness-110 transition cursor-pointer">
                     + Daftarkan Member
                 </button>
             </div>

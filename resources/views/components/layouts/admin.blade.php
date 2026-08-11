@@ -23,7 +23,7 @@
         body { font-family: 'Plus Jakarta Sans', 'Instrument Sans', sans-serif; }
     </style>
 </head>
-<body class="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased selection:bg-orange-500 selection:text-white flex flex-col md:flex-row transition-colors duration-300">
+<body x-data class="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased selection:bg-orange-500 selection:text-white flex flex-col md:flex-row transition-colors duration-300">
 
     <!-- Mobile Header & Toggle -->
     <div class="md:hidden sticky top-0 z-50 flex items-center justify-between border-b border-slate-200 dark:border-white/10 bg-white/95 dark:bg-slate-950/95 px-4 py-3 backdrop-blur-md transition-colors duration-300">
@@ -273,7 +273,7 @@
         </main>
     </div>
 
-    <!-- Global Theme Switcher Script -->
+    <!-- Global Utility Scripts (Theme, Modals & Toasts) -->
     <script>
         window.toggleTheme = function() {
             if (document.documentElement.classList.contains('dark')) {
@@ -283,6 +283,18 @@
                 document.documentElement.classList.add('dark');
                 localStorage.theme = 'dark';
             }
+        };
+
+        window.openModal = function(name) {
+            window.dispatchEvent(new CustomEvent('open-modal', { detail: name }));
+        };
+
+        window.closeModal = function(name) {
+            window.dispatchEvent(new CustomEvent('close-modal', { detail: name }));
+        };
+
+        window.showToast = function(detail) {
+            window.dispatchEvent(new CustomEvent('toast', { detail: detail }));
         };
     </script>
 </body>
