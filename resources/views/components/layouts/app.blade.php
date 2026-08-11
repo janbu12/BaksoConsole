@@ -23,7 +23,7 @@
         body { font-family: 'Plus Jakarta Sans', 'Instrument Sans', sans-serif; }
     </style>
 </head>
-<body x-data class="min-h-screen bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 antialiased selection:bg-[#f95721] selection:text-white flex flex-col justify-between transition-colors duration-300">
+<body x-data="{ mobileMenuOpen: false }" class="min-h-screen bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 antialiased selection:bg-[#f95721] selection:text-white flex flex-col justify-between transition-colors duration-300">
     
     <div>
         <!-- Top Navbar -->
@@ -104,27 +104,20 @@
                 </nav>
 
                 <!-- Right Action Bar -->
-                <div class="flex items-center gap-2.5">
+                <div class="flex items-center gap-2">
                     
-                    <!-- Theme Toggle Button (Crisp Vector SVG Icons) -->
-                    <button onclick="toggleTheme()" type="button" aria-label="Toggle Dark/Light Mode" title="Ganti Tema (Light / Dark Mode)" class="group flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 hover:border-orange-500 hover:text-[#f95721] transition shadow-sm">
-                        <!-- Sun Icon for Dark Mode -->
+                    <!-- Theme Toggle Button -->
+                    <button onclick="toggleTheme()" type="button" aria-label="Toggle Dark/Light Mode" class="group flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 hover:border-orange-500 hover:text-[#f95721] transition shadow-sm">
                         <svg class="h-4 w-4 hidden dark:block text-amber-400 group-hover:rotate-45 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
                         </svg>
-                        <!-- Moon Icon for Light Mode -->
                         <svg class="h-4 w-4 block dark:hidden text-slate-700 group-hover:-rotate-12 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
                         </svg>
                     </button>
 
-                    <!-- Notification Bell Button -->
-                    <button class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-900/80 text-slate-600 dark:text-slate-300 hover:border-orange-500/40 hover:text-slate-900 dark:hover:text-white transition">
-                        <i class="fa-regular fa-bell text-xs"></i>
-                    </button>
-
                     @auth
-                        <div class="flex items-center gap-2">
+                        <div class="hidden lg:flex items-center gap-2">
                             <a href="{{ route('profile') }}" class="flex items-center gap-2 rounded-full border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-900/80 px-3 py-1 hover:border-orange-500/40 transition">
                                 @if(auth()->user()->avatar)
                                     <img src="{{ Storage::url(auth()->user()->avatar) }}" alt="Avatar" class="h-6 w-6 rounded-full object-cover">
@@ -133,9 +126,8 @@
                                         {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
                                     </div>
                                 @endif
-                                <span class="text-xs font-bold text-slate-900 dark:text-white max-w-[100px] truncate hidden sm:inline">{{ auth()->user()->name }}</span>
+                                <span class="text-xs font-bold text-slate-900 dark:text-white max-w-[100px] truncate">{{ auth()->user()->name }}</span>
                             </a>
-
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" title="Keluar" class="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-900/80 text-slate-500 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/40 transition">
@@ -143,11 +135,16 @@
                                 </button>
                             </form>
                         </div>
+
+                        <!-- Mobile Hamburger for member nav -->
+                        <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-900/80 text-slate-600 dark:text-slate-300 hover:border-orange-500/40 transition">
+                            <i class="fa-solid fa-bars text-sm"></i>
+                        </button>
                     @else
                         <a href="{{ route('login') }}" class="rounded-full border border-slate-200 dark:border-white/20 bg-slate-100 dark:bg-slate-900/90 px-4 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:border-orange-500 hover:text-slate-900 dark:hover:text-white transition">
                             Masuk
                         </a>
-                        <a href="{{ route('register') }}" class="rounded-full bg-gradient-to-r from-[#f95721] to-amber-600 px-4 py-1.5 text-xs font-bold text-white shadow-md shadow-orange-500/20 hover:brightness-110 transition">
+                        <a href="{{ route('register') }}" class="hidden sm:inline-flex rounded-full bg-gradient-to-r from-[#f95721] to-amber-600 px-4 py-1.5 text-xs font-bold text-white shadow-md shadow-orange-500/20 hover:brightness-110 transition">
                             Premium Access
                         </a>
                     @endauth
@@ -155,6 +152,47 @@
 
             </div>
         </header>
+
+        <!-- Mobile Navigation Drawer (members only) -->
+        @auth
+            @if((auth()->user()->role?->value ?? 'user') === 'user')
+                <div
+                    x-show="mobileMenuOpen"
+                    x-transition:enter="transition-all duration-200"
+                    x-transition:enter-start="opacity-0 -translate-y-2"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    x-transition:leave="transition-all duration-150"
+                    x-transition:leave-start="opacity-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 -translate-y-2"
+                    class="lg:hidden border-b border-slate-200 dark:border-white/10 bg-white/95 dark:bg-[#0b0f19]/95 backdrop-blur-xl px-4 py-3 space-y-1"
+                    style="display: none;"
+                >
+                    <a href="{{ route('bookings') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium transition {{ request()->routeIs('bookings') ? 'bg-orange-500/15 text-[#f95721] font-bold' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5' }}">
+                        <i class="fa-solid fa-calendar-days text-sm w-5 text-center"></i><span>Booking Saya</span>
+                    </a>
+                    <a href="{{ route('rentals') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium transition {{ request()->routeIs('rentals') ? 'bg-orange-500/15 text-[#f95721] font-bold' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5' }}">
+                        <i class="fa-solid fa-clock text-sm w-5 text-center"></i><span>Rental Aktif</span>
+                    </a>
+                    <a href="{{ route('history') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium transition {{ request()->routeIs('history') ? 'bg-orange-500/15 text-[#f95721] font-bold' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5' }}">
+                        <i class="fa-solid fa-file-invoice text-sm w-5 text-center"></i><span>Riwayat Transaksi</span>
+                    </a>
+                    <a href="{{ route('leaderboard') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium transition {{ request()->routeIs('leaderboard') ? 'bg-orange-500/15 text-[#f95721] font-bold' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5' }}">
+                        <i class="fa-solid fa-trophy text-sm w-5 text-center"></i><span>Leaderboard</span>
+                    </a>
+                    <a href="{{ route('profile') }}" @click="mobileMenuOpen = false" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium transition text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5">
+                        <i class="fa-solid fa-user text-sm w-5 text-center"></i><span>Profil Saya</span>
+                    </a>
+                    <div class="border-t border-slate-200 dark:border-white/10 pt-2 mt-2">
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-500/10 transition">
+                                <i class="fa-solid fa-right-from-bracket w-5 text-center"></i><span>Keluar</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            @endif
+        @endauth
 
         <!-- Dynamic Floating Toast Alert Notifications -->
         <x-toast-container />
