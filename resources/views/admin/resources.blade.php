@@ -2,32 +2,32 @@
     <div x-data="resourceMonitor({{ Js::from($metrics) }})" x-init="initMonitor()" class="space-y-6">
 
         <!-- Top Status Bar & Controls -->
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl bg-slate-900/90 p-5 border border-white/10 shadow-xl">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl bg-white dark:bg-slate-900/90 p-5 border border-slate-200 dark:border-white/10 shadow-md dark:shadow-xl">
             <div class="flex items-center gap-3.5">
                 <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 shadow-lg shadow-orange-500/20">
                     <i class="fa-solid fa-server text-white text-xl"></i>
                 </div>
                 <div>
                     <div class="flex items-center gap-2">
-                        <h2 class="text-base font-black text-white">Live System Metrics</h2>
-                        <span class="flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                              :class="isOnline ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-red-500/20 text-red-300 border border-red-500/30'">
-                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" :class="isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'"></span>
+                        <h2 class="text-base font-black text-slate-900 dark:text-white">Live System Metrics</h2>
+                        <span class="flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30"
+                              :class="isOnline ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30' : 'bg-red-50 dark:bg-red-500/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-500/30'">
+                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" :class="isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'"></span>
                             <span x-text="isOnline ? 'Active Monitor' : 'Offline'">Active Monitor</span>
                         </span>
                     </div>
-                    <p class="text-xs text-slate-400 mt-0.5">
-                        Pembaruan Terakhir: <span class="font-mono text-orange-400 font-semibold" x-text="data.timestamp">{{ $metrics['timestamp'] }}</span> WIB
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Pembaruan Terakhir: <span class="font-mono text-[#f95721] font-semibold" x-text="data.timestamp">{{ $metrics['timestamp'] }}</span> WIB
                     </p>
                 </div>
             </div>
 
             <!-- Auto-Refresh Toggle & Manual Refresh -->
             <div class="flex items-center gap-3 self-end sm:self-center">
-                <label class="flex items-center gap-2 cursor-pointer select-none rounded-xl bg-slate-950 px-3 py-2 border border-white/10 hover:border-orange-500/40 transition">
-                    <input type="checkbox" x-model="autoRefresh" class="rounded border-white/20 bg-slate-900 text-orange-500 focus:ring-orange-500">
-                    <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                        <i class="fa-solid fa-rotate text-[11px] text-orange-400" :class="autoRefresh ? 'animate-spin' : ''"></i>
+                <label class="flex items-center gap-2 cursor-pointer select-none rounded-xl bg-slate-100 dark:bg-slate-950 px-3 py-2 border border-slate-200 dark:border-white/10 hover:border-orange-500/40 transition">
+                    <input type="checkbox" x-model="autoRefresh" class="rounded border-slate-300 dark:border-white/20 bg-white dark:bg-slate-900 text-orange-500 focus:ring-orange-500">
+                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                        <i class="fa-solid fa-rotate text-[11px] text-[#f95721]" :class="autoRefresh ? 'animate-spin' : ''"></i>
                         <span>Auto-Refresh (3s)</span>
                     </span>
                 </label>
@@ -43,46 +43,34 @@
         <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
 
             <!-- 1. CPU Usage -->
-            <div class="rounded-3xl bg-slate-900/80 p-5 border border-white/10 shadow-lg relative overflow-hidden flex flex-col justify-between">
+            <div class="rounded-3xl bg-white dark:bg-slate-900/80 p-5 border border-slate-200 dark:border-white/10 shadow-md dark:shadow-lg relative overflow-hidden flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2.5">
-                        <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                        <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/20 text-[#f95721] border border-orange-500/30">
                             <i class="fa-solid fa-microchip text-base"></i>
                         </div>
                         <div>
-                            <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">CPU Usage</span>
-                            <div class="text-[10px] text-slate-500" x-text="data.cpu.cores + ' Cores Logical'">{{ $metrics['cpu']['cores'] }} Cores Logical</div>
+                            <span class="text-xs font-bold uppercase text-slate-500 dark:text-slate-400 tracking-wider">CPU Usage</span>
+                            <div class="text-[10px] text-slate-400 dark:text-slate-500" x-text="data.cpu.cores + ' Cores Logical'">{{ $metrics['cpu']['cores'] }} Cores Logical</div>
                         </div>
                     </div>
-                    <span class="rounded px-2 py-0.5 text-[9px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                    <span class="rounded px-2 py-0.5 text-[9px] font-black uppercase tracking-wider bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30"
                           :class="{
-                              'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30': data.cpu.status === 'healthy',
-                              'bg-amber-500/20 text-amber-300 border border-amber-500/30': data.cpu.status === 'warning',
-                              'bg-red-500/20 text-red-300 border border-red-500/30': data.cpu.status === 'critical'
+                              'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30': data.cpu.status === 'healthy',
+                              'bg-amber-50 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30': data.cpu.status === 'warning',
+                              'bg-red-50 dark:bg-red-500/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-500/30': data.cpu.status === 'critical'
                           }" x-text="data.cpu.status">{{ $metrics['cpu']['status'] }}</span>
                 </div>
 
                 <div class="my-4 flex items-baseline justify-between">
-                    <div class="text-3xl font-black text-white font-mono">
-                        <span x-text="data.cpu.usage_percentage">{{ $metrics['cpu']['usage_percentage'] }}</span><span class="text-lg text-orange-400">%</span>
+                    <div class="text-3xl font-black text-slate-900 dark:text-white font-mono">
+                        <span x-text="data.cpu.usage_percentage">{{ $metrics['cpu']['usage_percentage'] }}</span><span class="text-lg text-[#f95721]">%</span>
                     </div>
-                    <div class="text-right text-[11px] text-slate-400 truncate max-w-[140px]" :title="data.cpu.model" x-text="data.cpu.model">
+                    <div class="text-right text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[140px]" :title="data.cpu.model" x-text="data.cpu.model">
                         {{ $metrics['cpu']['model'] }}
                     </div>
                 </div>
 
-                <!-- Progress Bar -->
-                <div>
-                    <div class="h-2 w-full rounded-full bg-slate-950 overflow-hidden border border-white/5">
-                        <div class="h-full transition-all duration-500 rounded-full {{ $metrics['cpu']['usage_percentage'] < 65 ? 'bg-emerald-500' : ($metrics['cpu']['usage_percentage'] < 85 ? 'bg-amber-500' : 'bg-red-500') }}"
-                             :class="{
-                                 'bg-emerald-500': data.cpu.usage_percentage < 65,
-                                 'bg-amber-500': data.cpu.usage_percentage >= 65 && data.cpu.usage_percentage < 85,
-                                 'bg-red-500': data.cpu.usage_percentage >= 85
-                             }"
-                             :style="`width: ${data.cpu.usage_percentage}%`"
-                             style="width: {{ $metrics['cpu']['usage_percentage'] }}%"></div>
-                    </div>
                     <div class="mt-1.5 flex justify-between text-[10px] text-slate-500 font-mono">
                         <span>0%</span>
                         <span>100%</span>

@@ -4,6 +4,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ? $title . ' — Bakso Console Admin' : 'Admin Operations Hub — Bakso Console' }}</title>
+    
+    <!-- Theme Initializer (Prevent FOUC) -->
+    <script>
+        if (localStorage.theme === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700,800|plus-jakarta-sans:400,500,600,700,800" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -13,26 +23,36 @@
         body { font-family: 'Plus Jakarta Sans', 'Instrument Sans', sans-serif; }
     </style>
 </head>
-<body class="min-h-screen bg-slate-950 text-slate-100 antialiased selection:bg-orange-500 selection:text-white flex flex-col md:flex-row">
+<body class="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased selection:bg-orange-500 selection:text-white flex flex-col md:flex-row transition-colors duration-300">
 
     <!-- Mobile Header & Toggle -->
-    <div class="md:hidden sticky top-0 z-50 flex items-center justify-between border-b border-white/10 bg-slate-950/95 px-4 py-3 backdrop-blur-md">
+    <div class="md:hidden sticky top-0 z-50 flex items-center justify-between border-b border-slate-200 dark:border-white/10 bg-white/95 dark:bg-slate-950/95 px-4 py-3 backdrop-blur-md transition-colors duration-300">
         <div class="flex items-center gap-2.5">
             <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 shadow-md shadow-orange-500/20">
                 <i class="fa-solid fa-gamepad text-white text-base"></i>
             </div>
             <div>
-                <span class="font-black text-white text-base">Bakso <span class="text-orange-400">Console</span></span>
-                <span class="ml-1.5 rounded-md bg-orange-500/20 px-1.5 py-0.5 text-[10px] font-bold text-orange-400 border border-orange-500/30">ADMIN</span>
+                <span class="font-black text-slate-900 dark:text-white text-base">Bakso <span class="text-orange-500">Console</span></span>
+                <span class="ml-1.5 rounded-md bg-orange-500/15 px-1.5 py-0.5 text-[10px] font-bold text-orange-600 dark:text-orange-400 border border-orange-500/30">ADMIN</span>
             </div>
         </div>
-        <button onclick="document.getElementById('admin-sidebar').classList.toggle('-translate-x-full')" class="rounded-lg border border-white/10 p-2 text-slate-300 hover:bg-white/5">
-            <i class="fa-solid fa-bars text-lg"></i>
-        </button>
+        <div class="flex items-center gap-2">
+            <button onclick="toggleTheme()" type="button" aria-label="Toggle Dark/Light Mode" class="group rounded-lg border border-slate-200 dark:border-white/10 p-2 text-slate-600 dark:text-slate-300 hover:border-orange-500 transition">
+                <svg class="h-4 w-4 hidden dark:block text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+                </svg>
+                <svg class="h-4 w-4 block dark:hidden text-slate-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+                </svg>
+            </button>
+            <button onclick="document.getElementById('admin-sidebar').classList.toggle('-translate-x-full')" class="rounded-lg border border-slate-200 dark:border-white/10 p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5">
+                <i class="fa-solid fa-bars text-lg"></i>
+            </button>
+        </div>
     </div>
 
     <!-- Sidebar Navigation -->
-    <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-40 w-72 -translate-x-full transform border-r border-white/10 bg-slate-900/95 backdrop-blur-xl transition-transform duration-200 ease-in-out md:translate-x-0 md:static flex flex-col justify-between">
+    <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-40 w-72 -translate-x-full transform border-r border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/95 backdrop-blur-xl transition-all duration-200 ease-in-out md:translate-x-0 md:static flex flex-col justify-between">
         
         <!-- Sidebar Top / Brand & Navigation -->
         <div class="flex flex-col h-full overflow-y-auto p-4 space-y-6">
@@ -42,10 +62,10 @@
                     <i class="fa-solid fa-bolt text-white text-xl"></i>
                 </div>
                 <div>
-                    <div class="flex items-center gap-1.5 font-black text-lg text-white">
-                        Bakso <span class="text-orange-400">Console</span>
+                    <div class="flex items-center gap-1.5 font-black text-lg text-slate-900 dark:text-white">
+                        Bakso <span class="text-orange-500">Console</span>
                     </div>
-                    <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         <span class="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         Admin Operations Hub
                     </div>
@@ -54,12 +74,12 @@
 
             <!-- Navigation Sections -->
             <nav class="space-y-1 text-sm font-medium">
-                <div class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                <div class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                     Menu Utama
                 </div>
 
                 <!-- 1. Dashboard & Analytics -->
-                <a href="{{ route('admin.dashboard') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.dashboard') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
+                <a href="{{ route('admin.dashboard') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.dashboard') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white' }}">
                     <div class="flex items-center gap-3">
                         <i class="fa-solid fa-chart-pie text-base w-5 text-center"></i>
                         <span>Dashboard & Insight</span>
@@ -70,7 +90,7 @@
                 </a>
 
                 <!-- 2. Units Management -->
-                <a href="{{ route('admin.units') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.units') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
+                <a href="{{ route('admin.units') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.units') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white' }}">
                     <div class="flex items-center gap-3">
                         <i class="fa-solid fa-gamepad text-base w-5 text-center"></i>
                         <span>Kelola Unit Konsol</span>
@@ -81,7 +101,7 @@
                 </a>
 
                 <!-- 3. Categories & Combos -->
-                <a href="{{ route('admin.categories') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.categories') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
+                <a href="{{ route('admin.categories') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.categories') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white' }}">
                     <div class="flex items-center gap-3">
                         <i class="fa-solid fa-tags text-base w-5 text-center"></i>
                         <span>Kategori & Combo</span>
@@ -92,7 +112,7 @@
                 </a>
 
                 <!-- 4. Member Management -->
-                <a href="{{ route('admin.members') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.members') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
+                <a href="{{ route('admin.members') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.members') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white' }}">
                     <div class="flex items-center gap-3">
                         <i class="fa-solid fa-users text-base w-5 text-center"></i>
                         <span>Manajemen Anggota</span>
@@ -102,12 +122,12 @@
                     @endif
                 </a>
 
-                <div class="pt-4 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                <div class="pt-4 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                     Operasional & Transaksi
                 </div>
 
                 <!-- 5. Bookings & Active Rentals -->
-                <a href="{{ route('admin.bookings') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.bookings') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
+                <a href="{{ route('admin.bookings') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.bookings') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white' }}">
                     <div class="flex items-center gap-3">
                         <i class="fa-solid fa-handshake text-base w-5 text-center"></i>
                         <span>Antrean Serah Terima</span>
@@ -118,7 +138,7 @@
                 </a>
 
                 <!-- 6. Returns & Fines -->
-                <a href="{{ route('admin.returns') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.returns') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
+                <a href="{{ route('admin.returns') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.returns') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white' }}">
                     <div class="flex items-center gap-3">
                         <i class="fa-solid fa-rotate-left text-base w-5 text-center"></i>
                         <span>Pengembalian & Denda</span>
@@ -129,7 +149,7 @@
                 </a>
 
                 <!-- 7. Pickup & Delivery Service -->
-                <a href="{{ route('admin.deliveries') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.deliveries') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
+                <a href="{{ route('admin.deliveries') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.deliveries') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white' }}">
                     <div class="flex items-center gap-3">
                         <i class="fa-solid fa-truck-fast text-base w-5 text-center"></i>
                         <span>Pickup & Delivery</span>
@@ -140,7 +160,7 @@
                 </a>
 
                 <!-- 8. Reports & Print -->
-                <a href="{{ route('admin.history') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.history') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
+                <a href="{{ route('admin.history') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.history') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white' }}">
                     <div class="flex items-center gap-3">
                         <i class="fa-solid fa-file-invoice text-base w-5 text-center"></i>
                         <span>Laporan & Riwayat</span>
@@ -151,7 +171,7 @@
                 </a>
 
                 <!-- 9. Leaderboard -->
-                <a href="{{ route('admin.leaderboard') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.leaderboard') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
+                <a href="{{ route('admin.leaderboard') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.leaderboard') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white' }}">
                     <div class="flex items-center gap-3">
                         <i class="fa-solid fa-trophy text-base w-5 text-center"></i>
                         <span>Leaderboard Member</span>
@@ -161,12 +181,12 @@
                     @endif
                 </a>
 
-                <div class="pt-4 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                <div class="pt-4 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                     Sistem & Pemantauan
                 </div>
 
                 <!-- 10. System & Resource Monitor -->
-                <a href="{{ route('admin.resources') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.resources') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
+                <a href="{{ route('admin.resources') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.resources') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white' }}">
                     <div class="flex items-center gap-3">
                         <i class="fa-solid fa-microchip text-base w-5 text-center"></i>
                         <span>Resource & Server Monitor</span>
@@ -174,32 +194,32 @@
                     @if(request()->routeIs('admin.resources'))
                         <i class="fa-solid fa-chevron-right text-xs"></i>
                     @else
-                        <span class="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span class="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     @endif
                 </a>
             </nav>
 
             <!-- Bottom Section: Admin User & Links -->
-            <div class="pt-6 border-t border-white/10 space-y-3">
-                <a href="{{ route('catalogue') }}" class="flex items-center gap-2.5 rounded-xl border border-white/10 bg-slate-950/60 px-3.5 py-2.5 text-xs font-semibold text-slate-300 transition hover:bg-white/5 hover:text-white">
+            <div class="pt-6 border-t border-slate-200 dark:border-white/10 space-y-3">
+                <a href="{{ route('catalogue') }}" class="flex items-center gap-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-950/60 px-3.5 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 transition hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
                     <i class="fa-solid fa-globe text-xs"></i>
                     <span>Lihat Portal Publik</span>
                 </a>
 
-                <div class="flex items-center justify-between rounded-xl bg-slate-950 p-3 border border-white/10">
+                <div class="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-950 p-3 border border-slate-200 dark:border-white/10">
                     <div class="flex items-center gap-2.5">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/20 text-orange-400 font-bold text-xs border border-orange-500/30">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/20 text-orange-600 dark:text-orange-400 font-bold text-xs border border-orange-500/30">
                             {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
                         </div>
                         <div class="truncate">
-                            <div class="text-xs font-bold text-white truncate">{{ auth()->user()->name }}</div>
-                            <div class="text-[10px] text-slate-400 capitalize">Role: {{ auth()->user()->role->value }}</div>
+                            <div class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ auth()->user()->name }}</div>
+                            <div class="text-[10px] text-slate-500 dark:text-slate-400 capitalize">Role: {{ auth()->user()->role->value }}</div>
                         </div>
                     </div>
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" title="Keluar" class="rounded-lg p-1.5 text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition">
+                        <button type="submit" title="Keluar" class="rounded-lg p-1.5 text-slate-500 hover:bg-red-500/10 hover:text-red-500 transition">
                             <i class="fa-solid fa-right-from-bracket text-xs"></i>
                         </button>
                     </form>
@@ -212,19 +232,32 @@
     <div class="flex-1 flex flex-col min-w-0 overflow-x-hidden">
         
         <!-- Top Action Bar -->
-        <header class="sticky top-0 z-30 hidden md:flex items-center justify-between border-b border-white/10 bg-slate-950/80 px-8 py-4 backdrop-blur-md">
+        <header class="sticky top-0 z-30 hidden md:flex items-center justify-between border-b border-slate-200 dark:border-white/10 bg-white/80 dark:bg-slate-950/80 px-8 py-4 backdrop-blur-md transition-colors duration-300">
             <div>
-                <h1 class="text-xl font-black text-white">{{ $header ?? $title ?? 'Admin Operations Hub' }}</h1>
-                <p class="text-xs text-slate-400">{{ $subtitle ?? 'Kelola inventaris, reservasi, dan performa bisnis Bakso Console.' }}</p>
+                <h1 class="text-xl font-black text-slate-900 dark:text-white">{{ $header ?? $title ?? 'Admin Operations Hub' }}</h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400">{{ $subtitle ?? 'Kelola inventaris, reservasi, dan performa bisnis Bakso Console.' }}</p>
             </div>
 
             <div class="flex items-center gap-3">
-                <a href="{{ route('admin.history.print') }}" target="_blank" class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-slate-900 px-3.5 py-2 text-xs font-bold text-slate-300 hover:bg-white/5 hover:text-white transition">
+                
+                <!-- Theme Switcher Button (Crisp Vector SVG Icons) -->
+                <button onclick="toggleTheme()" type="button" aria-label="Toggle Dark/Light Mode" title="Ganti Tema (Light / Dark Mode)" class="group flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-orange-500 hover:text-orange-500 transition shadow-sm">
+                    <!-- Sun Icon for Dark Mode -->
+                    <svg class="h-4 w-4 hidden dark:block text-amber-400 group-hover:rotate-45 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+                    </svg>
+                    <!-- Moon Icon for Light Mode -->
+                    <svg class="h-4 w-4 block dark:hidden text-slate-700 group-hover:-rotate-12 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+                    </svg>
+                </button>
+
+                <a href="{{ route('admin.history.print') }}" target="_blank" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-900 px-3.5 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/5 transition">
                     <i class="fa-solid fa-print text-xs"></i>
                     <span>Cetak Laporan</span>
                 </a>
 
-                <div class="flex items-center gap-2 rounded-xl bg-orange-500/10 border border-orange-500/30 px-3 py-1.5 text-xs font-bold text-orange-400">
+                <div class="flex items-center gap-2 rounded-xl bg-orange-500/10 border border-orange-500/30 px-3 py-1.5 text-xs font-bold text-orange-600 dark:text-orange-400">
                     <i class="fa-solid fa-bolt text-xs"></i>
                     <span>System Active</span>
                 </div>
@@ -234,47 +267,49 @@
         <!-- Flash Messages -->
         <div class="px-4 md:px-8 pt-6">
             @if(session('success'))
-                <div class="flex items-center justify-between rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-300 shadow-lg backdrop-blur-md mb-6">
+                <div class="flex items-center justify-between rounded-2xl border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 p-4 text-sm text-emerald-800 dark:text-emerald-300 shadow-lg backdrop-blur-md mb-6">
                     <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-circle-check text-emerald-400 text-xl"></i>
+                        <i class="fa-solid fa-circle-check text-emerald-600 dark:text-emerald-400 text-xl"></i>
                         <div>
-                            <div class="font-bold">Aksi Berhasil!</div>
-                            <div class="text-xs text-emerald-400/90">{{ session('success') }}</div>
+                            <div class="font-bold">Berhasil!</div>
+                            <div>{{ session('success') }}</div>
                         </div>
                     </div>
-                    <button onclick="this.parentElement.remove()" class="text-emerald-400 hover:text-white">✕</button>
                 </div>
             @endif
 
-            @if(session('error') || $errors->any())
-                <div class="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300 shadow-lg backdrop-blur-md mb-6">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-triangle-exclamation text-red-400 text-xl"></i>
-                        <div>
-                            <div class="font-bold">Terjadi Kesalahan!</div>
-                            <div class="text-xs text-red-400/90">
-                                {{ session('error') ?? $errors->first() }}
-                            </div>
-                        </div>
+            @if($errors->any())
+                <div class="rounded-2xl border border-red-500/30 bg-red-50 dark:bg-red-500/10 p-4 text-sm text-red-800 dark:text-red-300 shadow-lg backdrop-blur-md mb-6">
+                    <div class="flex items-center gap-2 font-bold mb-2">
+                        <i class="fa-solid fa-triangle-exclamation text-red-500 dark:text-red-400"></i>
+                        <span>Terjadi kesalahan input:</span>
                     </div>
+                    <ul class="list-inside list-disc space-y-1 text-xs text-red-700 dark:text-red-200">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
                 </div>
             @endif
         </div>
 
-        <!-- Page Content -->
-        <main class="flex-1 px-4 md:px-8 pb-16">
+        <!-- Content Slot -->
+        <main class="flex-1 px-4 md:px-8 pb-12">
             {{ $slot }}
         </main>
-
-        <!-- Footer -->
-        <footer class="border-t border-white/10 bg-slate-900/50 py-4 px-8 text-xs text-slate-500 flex flex-col md:flex-row items-center justify-between gap-2">
-            <div>
-                <span class="font-bold text-slate-400">Bakso Console</span> &copy; 2026 &mdash; BNSP Smart Console Rental Certification
-            </div>
-            <div>
-                Gupron in da House &middot; Powered by Laravel 12 & Tailwind CSS
-            </div>
-        </footer>
     </div>
+
+    <!-- Global Theme Switcher Script -->
+    <script>
+        window.toggleTheme = function() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        };
+    </script>
 </body>
 </html>
