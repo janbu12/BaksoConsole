@@ -196,7 +196,7 @@
 
                     <!-- Page Title — Desktop -->
                     <div class="hidden md:block min-w-0">
-                        @if(isset($header) && $header->isNotEmpty())
+                        @if(isset($header) && (is_object($header) ? $header->isNotEmpty() : !empty((string) $header)))
                             <div class="flex items-center gap-2">
                                 {!! $header !!}
                             </div>
@@ -236,9 +236,9 @@
             </header>
 
             <!-- Mobile Page Title (shown below header on mobile) -->
-            @if(isset($header) && $header->isNotEmpty() || isset($title))
+            @if(isset($header) && (is_object($header) ? $header->isNotEmpty() : !empty((string) $header)) || isset($title))
                 <div class="md:hidden px-4 pt-4 pb-2">
-                    @if(isset($header) && $header->isNotEmpty())
+                    @if(isset($header) && (is_object($header) ? $header->isNotEmpty() : !empty((string) $header)))
                         <div class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
                             {!! $header !!}
                         </div>
