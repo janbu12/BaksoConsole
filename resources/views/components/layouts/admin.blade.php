@@ -264,34 +264,8 @@
             </div>
         </header>
 
-        <!-- Flash Messages -->
-        <div class="px-4 md:px-8 pt-6">
-            @if(session('success'))
-                <div class="flex items-center justify-between rounded-2xl border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 p-4 text-sm text-emerald-800 dark:text-emerald-300 shadow-lg backdrop-blur-md mb-6">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-circle-check text-emerald-600 dark:text-emerald-400 text-xl"></i>
-                        <div>
-                            <div class="font-bold">Berhasil!</div>
-                            <div>{{ session('success') }}</div>
-                        </div>
-                    </div>
-                </div>
-            @endif
-
-            @if($errors->any())
-                <div class="rounded-2xl border border-red-500/30 bg-red-50 dark:bg-red-500/10 p-4 text-sm text-red-800 dark:text-red-300 shadow-lg backdrop-blur-md mb-6">
-                    <div class="flex items-center gap-2 font-bold mb-2">
-                        <i class="fa-solid fa-triangle-exclamation text-red-500 dark:text-red-400"></i>
-                        <span>Terjadi kesalahan input:</span>
-                    </div>
-                    <ul class="list-inside list-disc space-y-1 text-xs text-red-700 dark:text-red-200">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-        </div>
+        <!-- Dynamic Floating Toast Alert Notifications -->
+        <x-toast-container />
 
         <!-- Content Slot -->
         <main class="flex-1 px-4 md:px-8 pb-12">

@@ -156,31 +156,8 @@
             </div>
         </header>
 
-        <!-- Flash Notifications -->
-        <div class="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
-            @if(session('success'))
-                <div class="flex items-center justify-between rounded-2xl border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/40 p-4 text-emerald-800 dark:text-emerald-300 backdrop-blur-md shadow-lg shadow-emerald-950/10">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-circle-check text-emerald-600 dark:text-emerald-400 text-lg"></i>
-                        <span class="text-sm font-medium">{{ session('success') }}</span>
-                    </div>
-                </div>
-            @endif
-
-            @if($errors->any())
-                <div class="mt-3 rounded-2xl border border-red-500/30 bg-red-50 dark:bg-red-950/40 p-4 text-red-800 dark:text-red-300 backdrop-blur-md shadow-lg shadow-red-950/10">
-                    <div class="flex items-center gap-2 font-bold text-sm">
-                        <i class="fa-solid fa-triangle-exclamation text-red-500 dark:text-red-400"></i>
-                        <span>Terdapat kendala pada permintaan Anda:</span>
-                    </div>
-                    <ul class="mt-2 list-inside list-disc text-xs space-y-1 text-red-700 dark:text-red-200">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-        </div>
+        <!-- Dynamic Floating Toast Alert Notifications -->
+        <x-toast-container />
 
         <!-- Main Content Slot -->
         <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
