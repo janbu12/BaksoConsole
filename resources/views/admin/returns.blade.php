@@ -13,7 +13,6 @@
                         <th class="p-4">Total Tagihan</th>
                         <th class="p-4">Proses Pengembalian</th>
                         <th class="p-4">Denda Kerusakan</th>
-                        <th class="p-4 text-right">Pembayaran</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/5 text-slate-200">
@@ -78,21 +77,6 @@
                                 </form>
                             </td>
 
-                            <!-- Action 3: Payment Status -->
-                            <td class="p-4 text-right">
-                                @if($rental->transaction?->status !== 'paid')
-                                    <form method="POST" action="/admin/transactions/{{ $rental->transaction->id }}/pay">
-                                        @csrf
-                                        <button type="submit" class="rounded-xl bg-amber-500/20 border border-amber-500/30 px-3 py-1.5 text-[10px] font-bold text-amber-300 hover:bg-amber-500 hover:text-white transition">
-                                            <i class="fa-solid fa-sack-dollar"></i> Konfirmasi Lunas
-                                        </button>
-                                    </form>
-                                @else
-                                    <span class="rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 text-[10px] font-bold uppercase">
-                                        ✓ Lunas
-                                    </span>
-                                @endif
-                            </td>
                         </tr>
                     @empty
                         <tr>

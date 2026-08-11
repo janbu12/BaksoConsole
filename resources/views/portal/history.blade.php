@@ -64,6 +64,11 @@
                             <td class="p-4 sm:px-6">
                                 <div class="font-mono font-bold text-orange-400">{{ $rental->rental_code }}</div>
                                 <div class="font-mono text-[11px] text-slate-400">{{ $rental->transaction?->invoice_number }}</div>
+                                @if($rental->transaction)
+                                    <a href="{{ route('rentals.invoice.download', $rental) }}" class="mt-1 inline-flex items-center gap-1 text-[10px] font-bold text-orange-400 hover:text-orange-300">
+                                        <i class="fa-solid fa-file-arrow-down"></i> Download PDF
+                                    </a>
+                                @endif
                             </td>
                             <td class="p-4 sm:px-6 font-bold text-white">
                                 {{ $rental->unit->name }}

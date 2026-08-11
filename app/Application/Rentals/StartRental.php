@@ -36,11 +36,7 @@ class StartRental
         string $start,
         string $end,
         ?Booking $booking = null,
-        ?Combo $combo = null,
-        string $deliveryMethod = 'pickup',
-        ?string $address = null,
-        ?string $contactNumber = null,
-        float $deliveryFee = 0
+        ?Combo $combo = null
     ): Rental {
         $duration = RentalDuration::days($start, $end);
         if ($duration > 5) {
@@ -48,8 +44,7 @@ class StartRental
         }
 
         return DB::transaction(function () use (
-            $user, $unit, $start, $end, $booking, $combo, $duration,
-            $deliveryMethod, $address, $contactNumber, $deliveryFee
+            $user, $unit, $start, $end, $booking, $combo, $duration
         ) {
             $unit = Unit::query()->lockForUpdate()->findOrFail($unit->id);
             if ($user->rentals()->whereIn('status', [RentalStatus::Active, RentalStatus::Overdue])->count() >= 2) {
@@ -71,11 +66,11 @@ class StartRental
                 'duration_days' => $duration,
                 'daily_price' => $unit->daily_price,
                 'subtotal' => $subtotal,
-                'status' => RentalStatus::Active,
+                'status' => RentalStatus::Pending,
             ]);
 
             $unit->update(['status' => UnitStatus::Rented]);
-            $booking?->update(['status' => BookingStatus::Completed]);
+            $booking?->update(['status' => BookingStatus::Confirmed]);
 
             $transaction = Transaction::create([
                 'invoice_number' => 'INV-' . Str::upper(Str::random(10)),
@@ -90,15 +85,17 @@ class StartRental
             ]);
 
             // Create initial delivery_out record if specified
-            $fee = $deliveryMethod === 'delivery' ? ($deliveryFee > 0 ? $deliveryFee : 15000) : 0;
+            $method = $booking?->delivery_method ?? 'pickup';
+            $fee = $booking?->delivery_fee ?? 0;
+            
             Delivery::create([
                 'rental_id' => $rental->id,
                 'type' => DeliveryType::DeliveryOut,
-                'method' => $deliveryMethod === 'delivery' ? DeliveryMethod::Delivery : DeliveryMethod::Pickup,
-                'address' => $deliveryMethod === 'delivery' ? ($address ?: $user->profile?->address) : null,
-                'contact_number' => $deliveryMethod === 'delivery' ? ($contactNumber ?: $user->profile?->phone) : null,
+                'method' => $method === 'delivery' ? DeliveryMethod::Delivery : DeliveryMethod::Pickup,
+                'address' => $method === 'delivery' ? ($booking?->delivery_address ?: $user->profile?->address) : null,
+                'contact_number' => $method === 'delivery' ? ($booking?->contact_number ?: $user->profile?->phone) : null,
                 'delivery_fee' => $fee,
-                'status' => $deliveryMethod === 'delivery' ? DeliveryStatus::Waiting : DeliveryStatus::ReadyForPickup,
+                'status' => $method === 'delivery' ? DeliveryStatus::Waiting : DeliveryStatus::ReadyForPickup,
                 'scheduled_at' => now(),
             ]);
 

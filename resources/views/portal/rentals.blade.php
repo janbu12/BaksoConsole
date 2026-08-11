@@ -65,21 +65,121 @@
                     </div>
                 </div>
 
+                @if($deliveryOut?->method->value === 'delivery')
+                    @php
+                        $deliveryStatus = $deliveryOut->status->value;
+                        $deliveryStep = match($deliveryStatus) {
+                            'waiting' => 1,
+                            'in_transit' => 2,
+                            'received' => 3,
+                            default => 0,
+                        };
+                        $deliveryStatusText = match($deliveryStatus) {
+                            'waiting' => 'Menunggu Kurir',
+                            'in_transit' => 'Dalam Perjalanan',
+                            'received' => 'Sudah Diterima',
+                            'cancelled' => 'Pengiriman Dibatalkan',
+                            default => ucwords(str_replace('_', ' ', $deliveryStatus)),
+                        };
+                    @endphp
+
+                    <section class="mt-6 rounded-2xl border {{ $deliveryStatus === 'cancelled' ? 'border-red-500/30 bg-red-950/20' : 'border-blue-500/30 bg-blue-950/20' }} p-5" aria-label="Status pengiriman unit">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-truck-fast text-blue-400"></i>
+                                    <h3 class="text-sm font-bold text-white">Status Pengiriman ke Rumah</h3>
+                                </div>
+                                <p class="mt-1 text-[11px] text-slate-400">Pantau perjalanan {{ $rental->unit->name }} menuju alamat Anda.</p>
+                            </div>
+                            <span class="w-fit rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-wide {{ match($deliveryStatus) {
+                                'waiting' => 'border-slate-500/30 bg-slate-500/15 text-slate-300',
+                                'in_transit' => 'border-amber-500/30 bg-amber-500/15 text-amber-300',
+                                'received' => 'border-emerald-500/30 bg-emerald-500/15 text-emerald-300',
+                                'cancelled' => 'border-red-500/30 bg-red-500/15 text-red-300',
+                                default => 'border-blue-500/30 bg-blue-500/15 text-blue-300',
+                            } }}">
+                                {{ $deliveryStatusText }}
+                            </span>
+                        </div>
+
+                        @if($deliveryStatus !== 'cancelled')
+                            <div class="mt-5 grid grid-cols-3 gap-2" role="list" aria-label="Tahapan pengiriman">
+                                @foreach([
+                                    1 => ['Menunggu Kurir', 'Pesanan disiapkan'],
+                                    2 => ['Dalam Perjalanan', 'Kurir menuju rumah'],
+                                    3 => ['Sudah Diterima', 'Unit tiba di tujuan'],
+                                ] as $step => [$title, $description])
+                                    <div class="relative text-center" role="listitem">
+                                        @if($step < 3)
+                                            <div class="absolute left-1/2 top-3 h-0.5 w-full {{ $deliveryStep > $step ? 'bg-blue-400' : 'bg-white/10' }}"></div>
+                                        @endif
+                                        <div class="relative mx-auto flex h-6 w-6 items-center justify-center rounded-full border text-[10px] font-black {{ $deliveryStep >= $step ? 'border-blue-400 bg-blue-500 text-white' : 'border-white/15 bg-slate-900 text-slate-500' }}">
+                                            @if($deliveryStep > $step || ($deliveryStep === 3 && $step === 3))
+                                                <i class="fa-solid fa-check"></i>
+                                            @else
+                                                {{ $step }}
+                                            @endif
+                                        </div>
+                                        <div class="mt-2 text-[10px] font-bold {{ $deliveryStep >= $step ? 'text-white' : 'text-slate-500' }}">{{ $title }}</div>
+                                        <div class="mt-0.5 hidden text-[9px] text-slate-500 sm:block">{{ $description }}</div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="mt-4 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-200">
+                                Pengiriman dibatalkan. Silakan hubungi admin Bakso Console untuk informasi lebih lanjut.
+                            </div>
+                        @endif
+
+                        <div class="mt-5 grid gap-3 border-t border-white/10 pt-4 text-[11px] sm:grid-cols-3">
+                            <div>
+                                <span class="block text-[9px] font-bold uppercase tracking-wide text-slate-500">Alamat tujuan</span>
+                                <strong class="mt-1 block text-slate-200">{{ $deliveryOut->address ?: 'Alamat belum tersedia' }}</strong>
+                            </div>
+                            <div>
+                                <span class="block text-[9px] font-bold uppercase tracking-wide text-slate-500">Kurir</span>
+                                <strong class="mt-1 block {{ $deliveryOut->courier_name ? 'text-slate-200' : 'text-amber-300' }}">{{ $deliveryOut->courier_name ?: 'Belum ditugaskan' }}</strong>
+                            </div>
+                            <div>
+                                <span class="block text-[9px] font-bold uppercase tracking-wide text-slate-500">Terakhir diperbarui</span>
+                                <strong class="mt-1 block text-slate-200">{{ $deliveryOut->updated_at->timezone(config('app.timezone'))->format('d/m/Y H:i') }} WIB</strong>
+                            </div>
+                        </div>
+                    </section>
+                @endif
+
                 <!-- Financial & Service Breakdown -->
                 <div class="mt-6 grid gap-4 sm:grid-cols-3 text-xs">
                     <div class="rounded-2xl bg-slate-950/60 p-4 border border-white/5">
                         <span class="text-slate-400 block mb-1">Subtotal Sewa</span>
                         <b class="text-base text-white">Rp{{ number_format($rental->subtotal, 0, ',', '.') }}</b>
                     </div>
-                    <div class="rounded-2xl bg-slate-950/60 p-4 border border-white/5">
-                        <span class="text-slate-400 block mb-1">Status Transaksi</span>
-                        <b class="text-base uppercase {{ $rental->transaction?->status->value === 'paid' ? 'text-emerald-400' : 'text-amber-400' }}">
-                            {{ $rental->transaction?->status->value ?? 'Pending' }}
-                        </b>
+                    <div class="rounded-2xl bg-slate-950/60 p-4 border border-white/5 flex flex-col justify-between">
+                        <div>
+                            <span class="text-slate-400 block mb-1">Status Transaksi</span>
+                            <b class="text-base uppercase {{ $rental->transaction?->status->value === 'paid' ? 'text-emerald-400' : 'text-amber-400' }}">
+                                {{ $rental->transaction?->status->value ?? 'Pending' }}
+                            </b>
+                        </div>
+                        @if($rental->transaction?->status->value === 'pending')
+                            <form method="POST" action="/rentals/{{ $rental->id }}/pay" class="mt-2">
+                                @csrf
+                                <button type="submit" class="w-full rounded-lg bg-orange-500 py-1.5 text-[10px] font-bold text-white hover:bg-orange-600 transition">
+                                    Simulasi Bayar Lunas
+                                </button>
+                            </form>
+                        @endif
+                        @if($rental->transaction)
+                            <a href="{{ route('rentals.invoice.download', $rental) }}" class="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 py-1.5 text-[10px] font-bold text-slate-200 transition hover:border-orange-500/40 hover:text-orange-300">
+                                <i class="fa-solid fa-file-arrow-down"></i> Download Invoice PDF
+                            </a>
+                        @endif
                     </div>
                     <div class="rounded-2xl bg-slate-950/60 p-4 border border-white/5">
                         <span class="text-slate-400 block mb-1">Total Pembayaran</span>
                         <b class="text-base text-orange-400">Rp{{ number_format($rental->transaction?->total_amount ?? $rental->subtotal, 0, ',', '.') }}</b>
+                        <div class="text-[10px] text-slate-500 mt-1">(Sudah termasuk ongkir & denda)</div>
                     </div>
                 </div>
 

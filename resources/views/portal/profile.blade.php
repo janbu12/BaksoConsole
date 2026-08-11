@@ -11,10 +11,132 @@
     <div class="mt-8 grid gap-8 lg:grid-cols-3">
         <!-- User Badge & Rank Card (Left) -->
         <div class="rounded-3xl border border-white/10 bg-slate-900/90 p-6 flex flex-col justify-between shadow-xl text-center">
-            <div>
-                <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-orange-500 to-amber-600 text-3xl font-black text-white shadow-xl shadow-orange-500/25">
-                    {{ strtoupper(substr($user->name, 0, 2)) }}
+                @if($user->avatar)
+                    <img src="{{ Storage::url($user->avatar) }}" alt="Avatar" class="mx-auto flex h-24 w-24 object-cover rounded-3xl shadow-xl shadow-black/50 border-2 border-white/10">
+                @else
+                    <div class="mx-auto flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-orange-500 to-amber-600 text-3xl font-black text-white shadow-xl shadow-orange-500/25">
+                        {{ strtoupper(substr($user->name, 0, 2)) }}
+                    </div>
+                @endif
+
+                <div x-data="cameraAvatar()" class="mt-4">
+                    <button @click="openCamera()" type="button" class="text-xs font-bold text-orange-400 hover:text-orange-300 transition flex items-center justify-center gap-1.5 mx-auto">
+                        <i class="fa-solid fa-camera"></i> Ambil Foto via Kamera
+                    </button>
+
+                    <!-- Camera Modal -->
+                    <div x-show="isOpen" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+                        <div class="bg-slate-900 border border-white/10 p-6 rounded-3xl shadow-2xl max-w-sm w-full" @click.away="closeCamera()">
+                            <h3 class="text-lg font-bold text-white mb-4">Ambil Foto Profil</h3>
+                            
+                            <div class="relative bg-black rounded-2xl overflow-hidden aspect-square border border-white/10 mb-4 flex items-center justify-center">
+                                <video x-ref="video" class="absolute inset-0 w-full h-full object-cover" autoplay playsinline x-show="!capturedImage"></video>
+                                <img x-show="capturedImage" :src="capturedImage" class="absolute inset-0 w-full h-full object-cover">
+                                <canvas x-ref="canvas" style="display: none;"></canvas>
+                                
+                                <div x-show="!stream && !capturedImage" class="text-xs text-slate-500">Meminta akses kamera...</div>
+                            </div>
+
+                            <!-- Camera Selection Dropdown -->
+                            <div x-show="cameras.length > 1 && !capturedImage" class="mb-4">
+                                <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Pilih Kamera</label>
+                                <select x-model="selectedCamera" @change="startStream()" class="w-full bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:border-orange-500 focus:outline-none">
+                                    <template x-for="camera in cameras" :key="camera.deviceId">
+                                        <option :value="camera.deviceId" x-text="camera.label || 'Kamera ' + ($index + 1)"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <form method="POST" action="/profile/avatar">
+                                @csrf
+                                <input type="hidden" name="avatar_base64" :value="capturedImage">
+                                
+                                <div class="flex gap-2">
+                                    <template x-if="!capturedImage">
+                                        <button type="button" @click="capture()" class="flex-1 bg-orange-500 text-white font-bold py-3 rounded-xl hover:bg-orange-600 transition">Jepret Foto</button>
+                                    </template>
+                                    <template x-if="capturedImage">
+                                        <div class="flex flex-1 gap-2">
+                                            <button type="button" @click="retake()" class="flex-1 bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-slate-700 border border-white/5 transition">Ulangi</button>
+                                            <button type="submit" class="flex-1 bg-green-500 text-white font-bold py-3 rounded-xl hover:bg-green-600 transition">Simpan</button>
+                                        </div>
+                                    </template>
+                                    <button type="button" @click="closeCamera()" class="px-4 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-700 border border-white/5 transition"><i class="fa-solid fa-xmark"></i></button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
+
+                <script>
+                    function cameraAvatar() {
+                        return {
+                            isOpen: false,
+                            stream: null,
+                            capturedImage: null,
+                            cameras: [],
+                            selectedCamera: '',
+                            async openCamera() {
+                                this.isOpen = true;
+                                this.capturedImage = null;
+                                // Request initial permission to get device labels
+                                try {
+                                    const tempStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                                    tempStream.getTracks().forEach(track => track.stop());
+                                } catch (err) {
+                                    alert("Gagal mengakses kamera. Pastikan browser memiliki izin.");
+                                    this.closeCamera();
+                                    return;
+                                }
+
+                                await this.loadCameras();
+                                if (this.cameras.length > 0) {
+                                    this.selectedCamera = this.cameras[0].deviceId;
+                                    await this.startStream();
+                                }
+                            },
+                            async loadCameras() {
+                                const devices = await navigator.mediaDevices.enumerateDevices();
+                                this.cameras = devices.filter(device => device.kind === 'videoinput');
+                            },
+                            async startStream() {
+                                if (this.stream) {
+                                    this.stream.getTracks().forEach(track => track.stop());
+                                }
+                                
+                                const constraints = {
+                                    video: this.selectedCamera ? { deviceId: { exact: this.selectedCamera } } : { facingMode: "user" }
+                                };
+
+                                try {
+                                    this.stream = await navigator.mediaDevices.getUserMedia(constraints);
+                                    this.$refs.video.srcObject = this.stream;
+                                } catch (err) {
+                                    alert("Gagal memulai kamera yang dipilih.");
+                                }
+                            },
+                            closeCamera() {
+                                this.isOpen = false;
+                                if (this.stream) {
+                                    this.stream.getTracks().forEach(track => track.stop());
+                                    this.stream = null;
+                                }
+                            },
+                            capture() {
+                                const video = this.$refs.video;
+                                const canvas = this.$refs.canvas;
+                                canvas.width = video.videoWidth;
+                                canvas.height = video.videoHeight;
+                                canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+                                this.capturedImage = canvas.toDataURL('image/jpeg', 0.8);
+                                this.stream.getTracks().forEach(track => track.stop());
+                            },
+                            retake() {
+                                this.openCamera();
+                            }
+                        }
+                    }
+                </script>
                 <h2 class="text-xl font-bold text-white mt-4">{{ $user->name }}</h2>
                 <p class="text-xs text-slate-400">{{ $user->email }}</p>
 

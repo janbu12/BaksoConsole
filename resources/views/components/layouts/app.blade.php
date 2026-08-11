@@ -8,6 +8,7 @@
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700,800|plus-jakarta-sans:400,500,600,700,800" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', 'Instrument Sans', sans-serif; }
     </style>
@@ -71,9 +72,13 @@
                 @auth
                     <div class="flex items-center gap-3">
                         <a href="{{ route('profile') }}" class="flex items-center gap-2 rounded-xl bg-white/5 px-3 py-1.5 border border-white/10 hover:border-orange-500/40 transition">
-                            <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-500/20 text-xs font-bold text-orange-400">
-                                {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
-                            </div>
+                            @if(auth()->user()->avatar)
+                                <img src="{{ Storage::url(auth()->user()->avatar) }}" alt="Avatar" class="h-7 w-7 rounded-lg object-cover">
+                            @else
+                                <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-500/20 text-xs font-bold text-orange-400">
+                                    {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                                </div>
+                            @endif
                             <div class="hidden text-left sm:block">
                                 <div class="text-xs font-bold text-white leading-none">{{ auth()->user()->name }}</div>
                                 <div class="text-[10px] text-slate-400 capitalize">{{ auth()->user()->role->value }}</div>

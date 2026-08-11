@@ -68,7 +68,7 @@ it('serves all dedicated admin sidebar sub-pages correctly', function () {
     $this->actingAs($admin)->get('/admin/units')->assertOk()->assertSee('Kelola Unit Konsol');
     $this->actingAs($admin)->get('/admin/categories')->assertOk()->assertSee('Kategori Platform');
     $this->actingAs($admin)->get('/admin/members')->assertOk()->assertSee('Manajemen Anggota');
-    $this->actingAs($admin)->get('/admin/bookings')->assertOk()->assertSee('Reservasi Booking');
+    $this->actingAs($admin)->get('/admin/bookings')->assertOk()->assertSee('Antrean Serah Terima');
     $this->actingAs($admin)->get('/admin/returns')->assertOk()->assertSee('Pengembalian Unit');
     $this->actingAs($admin)->get('/admin/deliveries')->assertOk()->assertSee('Pickup & Delivery');
     $this->actingAs($admin)->get('/admin/history')->assertOk()->assertSee('Laporan Rekapitulasi');

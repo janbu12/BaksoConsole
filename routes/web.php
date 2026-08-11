@@ -5,6 +5,7 @@ use App\Enums\UnitStatus;
 use App\Http\Controllers\Admin\OperationsController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\PortalController;
 use App\Models\Category;
@@ -50,9 +51,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/rentals', [PortalController::class, 'rentals'])->name('rentals');
     Route::post('/rentals/{rental}/extensions', [PortalController::class, 'extension']);
     Route::post('/rentals/{rental}/deliveries', [PortalController::class, 'delivery']);
+    Route::post('/rentals/{rental}/pay', [PortalController::class, 'simulatePayment']);
+    Route::get('/rentals/{rental}/invoice', [InvoiceController::class, 'download'])->name('rentals.invoice.download');
     Route::get('/history', [PortalController::class, 'history'])->name('history');
     Route::get('/profile', [PortalController::class, 'profile'])->name('profile');
     Route::put('/profile', [PortalController::class, 'updateProfile']);
+    Route::post('/profile/avatar', [PortalController::class, 'updateAvatar']);
     Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard');
 });
 
@@ -75,21 +79,22 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::post('/units', [OperationsController::class, 'storeUnit']);
     Route::put('/units/{unit}', [OperationsController::class, 'updateUnit']);
     Route::delete('/units/{unit}', [OperationsController::class, 'destroyUnit']);
-    
+
     Route::post('/categories', [OperationsController::class, 'storeCategory']);
     Route::delete('/categories/{category}', [OperationsController::class, 'destroyCategory']);
-    
+
     Route::post('/combos', [OperationsController::class, 'storeCombo']);
     Route::delete('/combos/{combo}', [OperationsController::class, 'destroyCombo']);
-    
+
     Route::post('/members', [OperationsController::class, 'storeMember']);
     Route::put('/members/{member}', [OperationsController::class, 'updateMember']);
     Route::delete('/members/{member}', [OperationsController::class, 'destroyMember']);
-    
-    Route::post('/rentals', [OperationsController::class, 'startRental']);
+
+    Route::post('/rentals/{rental}/handover', [OperationsController::class, 'handoverUnit']);
     Route::post('/extensions/{extension}', [OperationsController::class, 'reviewExtension']);
     Route::post('/rentals/{rental}/return', [OperationsController::class, 'processReturn']);
     Route::post('/rentals/{rental}/fines', [OperationsController::class, 'addFine']);
+    Route::post('/rentals/{rental}/confirm-fine-paid', [OperationsController::class, 'confirmFinePaid']);
     Route::post('/deliveries/{delivery}', [OperationsController::class, 'updateDelivery']);
     Route::post('/transactions/{transaction}/pay', [OperationsController::class, 'markPaymentPaid']);
 });

@@ -17,15 +17,15 @@ it('runs booking rental and return atomically', function () {
     $user = User::factory()->create();
     $unit = Unit::create(['name' => 'PlayStation 5', 'code' => 'PS5-001', 'daily_price' => 50_000, 'max_players' => 4, 'status' => UnitStatus::Available]);
 
-    $booking = app(CreateBooking::class)->handle($user, $unit, '2026-08-10', '2026-08-12');
-    expect($booking->duration_days)->toBe(3)->and($booking->status)->toBe(BookingStatus::Pending);
-
-    $booking->update(['status' => BookingStatus::Confirmed]);
-    $rental = app(StartRental::class)->handle($user, $unit, '2026-08-10', '2026-08-12', $booking);
-    expect($rental->status)->toBe(RentalStatus::Active)
+    $rental = app(CreateBooking::class)->handle($user, $unit, '2026-08-10', '2026-08-12');
+    expect($rental->status)->toBe(RentalStatus::Pending)
+        ->and($rental->booking->status)->toBe(BookingStatus::Confirmed)
         ->and($rental->subtotal)->toBe('150000.00')
         ->and($rental->transaction)->not->toBeNull()
         ->and($unit->fresh()->status)->toBe(UnitStatus::Rented);
+
+    $rental->transaction->update(['status' => \App\Enums\PaymentStatus::Paid]);
+    $rental->update(['status' => RentalStatus::Active]);
 
     app(ProcessReturn::class)->handle($rental, '2026-08-14', 10_000, 'Terlambat');
     expect($rental->fresh()->status)->toBe(RentalStatus::Returned)

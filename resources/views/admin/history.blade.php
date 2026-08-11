@@ -26,7 +26,7 @@
                         <th class="p-4">Periode Sewa</th>
                         <th class="p-4">Rincian Biaya</th>
                         <th class="p-4">Status Rental</th>
-                        <th class="p-4 text-right">Total Bayar</th>
+                        <th class="p-4 text-right">Total Bayar / Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/5 text-slate-200">
@@ -66,8 +66,43 @@
                                     {{ $rental->status->value }}
                                 </span>
                             </td>
-                            <td class="p-4 text-right font-black text-sm text-white">
-                                Rp {{ number_format($rental->transaction?->total_amount ?? $rental->subtotal, 0, ',', '.') }}
+                            <td class="p-4 text-right">
+                                <div class="font-black text-sm text-white">
+                                    Rp {{ number_format($rental->transaction?->total_amount ?? $rental->subtotal, 0, ',', '.') }}
+                                </div>
+                                {{-- Konfirmasi cash jika ada denda atau ongkir jemput return --}}
+                                @if($rental->status->value === 'returned')
+                                    @php
+                                        $hasFine         = (float)($rental->transaction?->fine_amount ?? 0) > 0;
+                                        $returnPickupFee = (float) $rental->deliveries
+                                            ->where('type.value', 'delivery_return')
+                                            ->where('method.value', 'delivery')
+                                            ->sum('delivery_fee');
+                                        $hasAdditional   = $hasFine || $returnPickupFee > 0;
+                                        $alreadyConfirmed = $rental->transaction?->notes && str_contains($rental->transaction->notes, 'dibayar cash');
+                                    @endphp
+                                    @if($hasAdditional)
+                                        @if($alreadyConfirmed)
+                                            <span class="mt-1 inline-block rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 text-[9px] font-bold">
+                                                ✓ Tagihan Cash Dikonfirmasi
+                                            </span>
+                                        @else
+                                            @php
+                                                $labelParts = [];
+                                                if($hasFine) $labelParts[] = 'Denda Rp' . number_format($rental->transaction->fine_amount, 0, ',', '.');
+                                                if($returnPickupFee > 0) $labelParts[] = 'Ongkir Jemput Rp' . number_format($returnPickupFee, 0, ',', '.');
+                                                $confirmLabel = implode(' + ', $labelParts);
+                                            @endphp
+                                            <form method="POST" action="/admin/rentals/{{ $rental->id }}/confirm-fine-paid" class="mt-1.5">
+                                                @csrf
+                                                <button type="submit" onclick="return confirm('Konfirmasi {{ $confirmLabel }} sudah diterima secara cash?');"
+                                                    class="rounded-lg bg-amber-500/20 border border-amber-500/30 px-2.5 py-1 text-[9px] font-bold text-amber-300 hover:bg-amber-500 hover:text-white transition">
+                                                    <i class="fa-solid fa-sack-dollar"></i> Konfirmasi Cash
+                                                </button>
+                                            </form>
+                                        @endif
+                                    @endif
+                                @endif
                             </td>
                         </tr>
                     @empty

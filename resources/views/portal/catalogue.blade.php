@@ -107,6 +107,20 @@
                 @php
                     $isAvailable = $unit->status->value === 'available';
                     $isBestMatch = $unit->smart_pick['is_best_match'] ?? false;
+                    $canBook = $unit->status->value !== 'maintenance';
+                    $blockedPeriods = $unit->bookings
+                        ->map(fn ($booking) => [
+                            'start' => $booking->start_date,
+                            'end' => $booking->end_date,
+                            'label' => 'Sudah dibooking',
+                        ])
+                        ->concat($unit->rentals->map(fn ($rental) => [
+                            'start' => $rental->start_date,
+                            'end' => $rental->due_date,
+                            'label' => 'Sedang disewa',
+                        ]))
+                        ->sortBy('start')
+                        ->values();
                 @endphp
                 <article class="relative rounded-3xl border {{ $isBestMatch ? 'border-orange-500 ring-2 ring-orange-500/30 bg-gradient-to-b from-orange-950/20 to-slate-900' : 'border-white/10 bg-slate-900/90' }} p-6 flex flex-col justify-between shadow-xl transition-all duration-300 hover:border-orange-500/40">
                     <!-- Best Match Ribbon -->
@@ -180,34 +194,69 @@
                                 Rp{{ number_format($unit->daily_price, 0, ',', '.') }}<span class="text-xs font-normal text-slate-400">/hari</span>
                             </div>
                         </div>
+
+                        <div class="mt-4 rounded-xl border {{ $blockedPeriods->isEmpty() ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-amber-500/20 bg-amber-500/5' }} p-3">
+                            <div class="text-[10px] font-bold uppercase tracking-wide {{ $blockedPeriods->isEmpty() ? 'text-emerald-400' : 'text-amber-400' }}">
+                                Jadwal unit
+                            </div>
+                            @forelse($blockedPeriods as $period)
+                                <div class="mt-1.5 flex items-center justify-between gap-2 text-[11px]">
+                                    <span class="text-slate-300">{{ $period['label'] }}</span>
+                                    <strong class="text-white">{{ $period['start']->format('d/m/Y') }} - {{ $period['end']->format('d/m/Y') }}</strong>
+                                </div>
+                            @empty
+                                <p class="mt-1 text-[11px] text-emerald-300">Belum ada jadwal yang terisi mulai hari ini.</p>
+                            @endforelse
+                        </div>
                     </div>
 
                     <!-- Booking Form / Action -->
                     <div class="mt-6 pt-4 border-t border-white/10">
                         @auth
-                            @if($isAvailable)
+                            @if($canBook)
                                 <details class="group/booking">
                                     <summary class="cursor-pointer list-none rounded-xl bg-orange-500 px-4 py-2.5 text-center text-xs font-bold text-white shadow-md hover:bg-orange-600 transition flex items-center justify-center gap-1.5">
                                         <span>📅</span> Buat Reservasi / Booking
                                     </summary>
 
-                                    <form method="POST" action="/bookings" class="mt-3 space-y-3 rounded-2xl bg-slate-950 p-4 border border-white/10 text-left">
+                                    <form method="POST" action="/bookings" class="mt-3 space-y-3 rounded-2xl bg-slate-950 p-4 border border-white/10 text-left" x-data="{ deliveryMethod: 'pickup' }">
                                         @csrf
                                         <input type="hidden" name="unit_id" value="{{ $unit->id }}">
 
                                         <div>
                                             <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Tanggal Mulai</label>
-                                            <input type="date" name="start_date" min="{{ date('Y-m-d') }}" value="{{ date('Y-m-d') }}" class="w-full rounded-lg border border-white/10 bg-slate-900 p-2 text-xs text-white focus:border-orange-500 focus:outline-none" required>
+                                            <input type="date" name="start_date" min="{{ today()->toDateString() }}" value="{{ today()->toDateString() }}" class="w-full rounded-lg border border-white/10 bg-slate-900 p-2 text-xs text-white focus:border-orange-500 focus:outline-none" required>
                                         </div>
 
                                         <div>
                                             <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Tanggal Selesai (Maks 5 Hari)</label>
-                                            <input type="date" name="end_date" min="{{ date('Y-m-d') }}" value="{{ date('Y-m-d', strtotime('+2 days')) }}" class="w-full rounded-lg border border-white/10 bg-slate-900 p-2 text-xs text-white focus:border-orange-500 focus:outline-none" required>
+                                            <input type="date" name="end_date" min="{{ today()->toDateString() }}" value="{{ today()->addDays(2)->toDateString() }}" class="w-full rounded-lg border border-white/10 bg-slate-900 p-2 text-xs text-white focus:border-orange-500 focus:outline-none" required>
                                         </div>
 
                                         <div>
+                                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Metode Pengiriman</label>
+                                            <select name="delivery_method" x-model="deliveryMethod" class="w-full rounded-lg border border-white/10 bg-slate-900 p-2 text-xs text-white focus:border-orange-500 focus:outline-none">
+                                                <option value="pickup">Ambil di Toko</option>
+                                                <option value="delivery">Diantar Kurir (+Rp 15.000)</option>
+                                            </select>
+                                        </div>
+
+                                        <template x-if="deliveryMethod === 'delivery'">
+                                            <div class="space-y-3 border-l-2 border-orange-500 pl-3 ml-1 mt-2">
+                                                <div>
+                                                    <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Alamat Pengiriman</label>
+                                                    <textarea name="delivery_address" rows="2" placeholder="Alamat lengkap..." class="w-full rounded-lg border border-white/10 bg-slate-900 p-2 text-xs text-white focus:border-orange-500 focus:outline-none" required>{{ auth()->user()->profile?->address ?? '' }}</textarea>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Nomor Kontak / WhatsApp</label>
+                                                    <input type="text" name="contact_number" value="{{ auth()->user()->profile?->phone ?? '' }}" placeholder="08..." class="w-full rounded-lg border border-white/10 bg-slate-900 p-2 text-xs text-white focus:border-orange-500 focus:outline-none" required>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <div>
                                             <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Catatan Tambahan (Opsional)</label>
-                                            <input name="notes" placeholder="Misal: butuh tambahan kabel HDMI / dijemput kurir" class="w-full rounded-lg border border-white/10 bg-slate-900 p-2 text-xs text-white placeholder-slate-500 focus:border-orange-500 focus:outline-none">
+                                            <input name="notes" placeholder="Misal: butuh tambahan kabel HDMI" class="w-full rounded-lg border border-white/10 bg-slate-900 p-2 text-xs text-white placeholder-slate-500 focus:border-orange-500 focus:outline-none">
                                         </div>
 
                                         <button type="submit" class="w-full rounded-lg bg-emerald-600 py-2.5 text-xs font-bold text-white hover:bg-emerald-500 transition">

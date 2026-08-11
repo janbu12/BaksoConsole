@@ -108,8 +108,8 @@
                 <!-- 5. Bookings & Active Rentals -->
                 <a href="{{ route('admin.bookings') }}" class="group flex items-center justify-between rounded-xl px-3.5 py-2.5 transition {{ request()->routeIs('admin.bookings') ? 'bg-orange-500 text-white font-semibold shadow-lg shadow-orange-500/25' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
                     <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-calendar-check text-base w-5 text-center"></i>
-                        <span>Reservasi & Booking</span>
+                        <i class="fa-solid fa-handshake text-base w-5 text-center"></i>
+                        <span>Antrean Serah Terima</span>
                     </div>
                     @if(request()->routeIs('admin.bookings'))
                         <i class="fa-solid fa-chevron-right text-xs"></i>

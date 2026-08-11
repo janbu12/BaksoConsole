@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Application\Bookings\CreateBooking;
-use App\Application\Rentals\StartRental;
+use App\Application\Transactions\RecalculateTransaction;
 use App\Domain\Loyalty\BaksoRank;
 use App\Domain\Rentals\RentalWarning;
 use App\Domain\Rentals\SmartPickRecommender;
 use App\Enums\BookingStatus;
-use App\Enums\DeliveryMethod;
 use App\Enums\DeliveryStatus;
 use App\Enums\ExtensionStatus;
+use App\Enums\PaymentStatus;
 use App\Enums\RentalStatus;
 use App\Enums\UnitStatus;
 use App\Models\Booking;
@@ -22,6 +22,7 @@ use App\Models\RentalExtension;
 use App\Models\Unit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class PortalController extends Controller
@@ -69,11 +70,22 @@ class PortalController extends Controller
 
     public function catalogue(Request $request): View
     {
-        $query = Unit::query()->with('categories');
+        $query = Unit::query()->with([
+            'categories',
+            'bookings' => fn ($bookings) => $bookings
+                ->whereIn('status', [BookingStatus::Pending, BookingStatus::Confirmed])
+                ->whereDate('end_date', '>=', today())
+                ->orderBy('start_date'),
+            'rentals' => fn ($rentals) => $rentals
+                ->whereNull('booking_id')
+                ->whereIn('status', [RentalStatus::Pending, RentalStatus::Active, RentalStatus::Overdue])
+                ->whereDate('due_date', '>=', today())
+                ->orderBy('start_date'),
+        ]);
 
         if ($request->filled('q')) {
-            $query->where('name', 'like', '%' . $request->q . '%')
-                  ->orWhere('code', 'like', '%' . $request->q . '%');
+            $query->where('name', 'like', '%'.$request->q.'%')
+                ->orWhere('code', 'like', '%'.$request->q.'%');
         }
 
         if ($request->filled('players')) {
@@ -123,6 +135,9 @@ class PortalController extends Controller
             'start_date' => ['required', 'date', 'after_or_equal:today'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
             'notes' => ['nullable', 'string', 'max:1000'],
+            'delivery_method' => ['required', 'in:pickup,delivery'],
+            'delivery_address' => ['required_if:delivery_method,delivery', 'nullable', 'string', 'max:500'],
+            'contact_number' => ['required_if:delivery_method,delivery', 'nullable', 'string', 'max:30'],
         ]);
 
         try {
@@ -132,20 +147,36 @@ class PortalController extends Controller
                 $unit,
                 $data['start_date'],
                 $data['end_date'],
-                $data['notes'] ?? null
+                $data['notes'] ?? null,
+                $data['delivery_method'],
+                $data['delivery_address'] ?? null,
+                $data['contact_number'] ?? null
             );
         } catch (\DomainException $e) {
             return back()->withInput()->withErrors(['schedule' => $e->getMessage()]);
         }
 
-        return redirect('/bookings')->with('success', 'Booking berhasil dibuat! Menunggu konfirmasi admin.');
+        return redirect('/rentals')->with('success', 'Booking berhasil! Silakan selesaikan pembayaran pada tagihan di bawah ini.');
+    }
+
+    public function simulatePayment(Request $request, Rental $rental): RedirectResponse
+    {
+        abort_unless($rental->user_id === $request->user()->id, 403);
+        abort_unless($rental->transaction->status === PaymentStatus::Pending, 422);
+
+        $rental->transaction->update([
+            'status' => PaymentStatus::Paid,
+            'paid_at' => now(),
+        ]);
+
+        return back()->with('success', 'Pembayaran berhasil disimulasikan! Menunggu admin melakukan serah terima unit.');
     }
 
     public function cancelBooking(Request $request, Booking $booking): RedirectResponse
     {
         abort_unless($booking->user_id === $request->user()->id, 403);
         abort_unless($booking->status === BookingStatus::Pending, 422);
-        
+
         $booking->update(['status' => BookingStatus::Cancelled]);
 
         return back()->with('success', "Booking #{$booking->booking_code} berhasil dibatalkan.");
@@ -167,9 +198,9 @@ class PortalController extends Controller
     public function extension(Request $request, Rental $rental): RedirectResponse
     {
         abort_unless($rental->user_id === $request->user()->id, 403);
-        
+
         $data = $request->validate([
-            'requested_due_date' => ['required', 'date', 'after:' . $rental->due_date->toDateString()],
+            'requested_due_date' => ['required', 'date', 'after:'.$rental->due_date->toDateString()],
             'reason' => ['nullable', 'string', 'max:500'],
         ]);
 
@@ -188,7 +219,7 @@ class PortalController extends Controller
             'requested_due_date' => $data['requested_due_date'],
             'additional_days' => $additionalDays,
             'additional_cost' => $rental->unit->daily_price * $additionalDays,
-            'reason' => ($data['reason'] ?? 'Perpanjangan masa rental') . $note,
+            'reason' => ($data['reason'] ?? 'Perpanjangan masa rental').$note,
             'status' => ExtensionStatus::Pending,
         ]);
 
@@ -198,7 +229,7 @@ class PortalController extends Controller
     public function delivery(Request $request, Rental $rental): RedirectResponse
     {
         abort_unless($rental->user_id === $request->user()->id, 403);
-        
+
         $data = $request->validate([
             'type' => ['required', 'in:delivery_out,delivery_return'],
             'method' => ['required', 'in:pickup,delivery'],
@@ -208,7 +239,7 @@ class PortalController extends Controller
 
         $fee = $data['method'] === 'delivery' ? 15000 : 0;
 
-        Delivery::updateOrCreate(
+        $delivery = Delivery::updateOrCreate(
             ['rental_id' => $rental->id, 'type' => $data['type']],
             [
                 'method' => $data['method'],
@@ -220,7 +251,16 @@ class PortalController extends Controller
             ]
         );
 
-        return back()->with('success', 'Metode pengembalian unit berhasil disimpan.');
+        // Jika ini adalah pengiriman kembali (return pickup), perbarui total tagihan
+        if ($data['type'] === 'delivery_return' && $rental->transaction) {
+            app(RecalculateTransaction::class)->handle($rental);
+        }
+
+        $message = $data['method'] === 'delivery'
+            ? 'Permintaan penjemputan kurir berhasil disimpan. Ongkir Rp15.000 akan dibayarkan saat kurir datang.'
+            : 'Metode pengembalian (antar sendiri) berhasil disimpan.';
+
+        return back()->with('success', $message);
     }
 
     public function history(Request $request): View
@@ -259,5 +299,43 @@ class PortalController extends Controller
         $request->user()->profile()->updateOrCreate([], collect($data)->except('name')->all());
 
         return back()->with('success', 'Informasi profil berhasil diperbarui.');
+    }
+
+    public function updateAvatar(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'avatar_base64' => ['required', 'string'],
+        ]);
+
+        $base64Image = $request->input('avatar_base64');
+
+        if (preg_match('/^data:image\/(\w+);base64,/', $base64Image, $type)) {
+            $base64Image = substr($base64Image, strpos($base64Image, ',') + 1);
+            $type = strtolower($type[1]);
+
+            if (! in_array($type, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                return back()->withErrors(['avatar_base64' => 'Format gambar tidak valid.']);
+            }
+
+            $base64Image = str_replace(' ', '+', $base64Image);
+            $imageFile = base64_decode($base64Image);
+
+            if ($imageFile === false) {
+                return back()->withErrors(['avatar_base64' => 'Gagal membaca gambar.']);
+            }
+
+            $fileName = 'avatars/'.$request->user()->id.'_'.time().'.'.$type;
+            Storage::disk('public')->put($fileName, $imageFile);
+
+            if ($request->user()->avatar && Storage::disk('public')->exists($request->user()->avatar)) {
+                Storage::disk('public')->delete($request->user()->avatar);
+            }
+
+            $request->user()->update(['avatar' => $fileName]);
+
+            return back()->with('success', 'Foto profil berhasil diperbarui via kamera!');
+        }
+
+        return back()->withErrors(['avatar_base64' => 'Format gambar Base64 tidak valid.']);
     }
 }

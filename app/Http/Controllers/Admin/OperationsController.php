@@ -69,7 +69,11 @@ class OperationsController extends Controller
     public function bookings(): View
     {
         return view('admin.bookings', [
-            'bookings' => Booking::with(['user.profile', 'unit'])->latest()->paginate(10),
+            'rentals' => Rental::where('status', RentalStatus::Pending)
+                ->whereHas('transaction', fn($q) => $q->where('status', \App\Enums\PaymentStatus::Paid))
+                ->with(['user.profile', 'unit', 'transaction', 'booking'])
+                ->latest()
+                ->paginate(10),
         ]);
     }
 
@@ -248,44 +252,19 @@ class OperationsController extends Controller
         return back()->with('success', "Paket {$data['name']} berhasil dibuat!");
     }
 
-    public function startRental(Request $r, StartRental $action): RedirectResponse
+    public function handoverUnit(Request $r, Rental $rental): RedirectResponse
     {
-        $data = $r->validate([
-            'booking_id' => 'nullable|exists:bookings,id',
-            'user_id' => 'required|exists:users,id',
-            'unit_id' => 'required|exists:units,id',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'combo_id' => 'nullable|exists:combos,id',
-            'delivery_method' => 'nullable|string',
-            'address' => 'nullable|string',
-            'contact_number' => 'nullable|string',
-            'delivery_fee' => 'nullable|numeric|min:0',
-        ]);
+        abort_unless($rental->status === RentalStatus::Pending, 422, 'Rental ini tidak berstatus pending.');
+        abort_unless($rental->transaction->status === \App\Enums\PaymentStatus::Paid, 422, 'Tagihan belum lunas.');
 
-        $user = User::findOrFail($data['user_id']);
-        $unit = Unit::findOrFail($data['unit_id']);
-        $booking = !empty($data['booking_id']) ? Booking::find($data['booking_id']) : null;
-        $combo = !empty($data['combo_id']) ? Combo::find($data['combo_id']) : null;
-
-        try {
-            $rental = $action->handle(
-                $user,
-                $unit,
-                $data['start_date'],
-                $data['end_date'],
-                $booking,
-                $combo,
-                $data['delivery_method'] ?? 'pickup',
-                $data['address'] ?? null,
-                $data['contact_number'] ?? null,
-                (float) ($data['delivery_fee'] ?? 0)
-            );
-        } catch (\DomainException $e) {
-            return back()->withErrors(['rental' => $e->getMessage()]);
+        $rental->update(['status' => RentalStatus::Active]);
+        
+        // Tandai pesanan Booking sudah complete jika ada
+        if ($rental->booking) {
+            $rental->booking->update(['status' => BookingStatus::Completed]);
         }
 
-        return back()->with('success', "Rental #{$rental->rental_code} berhasil diaktifkan!");
+        return back()->with('success', "Unit untuk Rental #{$rental->rental_code} berhasil diserahkan kepada pengguna.");
     }
 
     public function reviewExtension(Request $r, RentalExtension $extension, RecalculateTransaction $recalc): RedirectResponse
@@ -396,6 +375,42 @@ class OperationsController extends Controller
             'paid_at' => now(),
         ]);
 
+        if ($transaction->rental && $transaction->rental->status === RentalStatus::Pending) {
+            $transaction->rental->update(['status' => RentalStatus::Active]);
+        }
+
         return back()->with('success', "Pembayaran invoice #{$transaction->invoice_number} telah lunas.");
+    }
+
+    public function confirmFinePaid(Rental $rental): RedirectResponse
+    {
+        abort_unless($rental->status === RentalStatus::Returned, 422, 'Rental belum dikembalikan.');
+        abort_unless($rental->transaction !== null, 422, 'Transaksi tidak ditemukan.');
+
+        $transaction = $rental->transaction;
+        $fineAmount  = (float) ($transaction->fine_amount ?? 0);
+
+        // Hitung ongkir jemput return (delivery_return dengan metode delivery)
+        $returnPickupFee = (float) $rental->deliveries()
+            ->where('type', \App\Enums\DeliveryType::DeliveryReturn)
+            ->where('method', \App\Enums\DeliveryMethod::Delivery)
+            ->sum('delivery_fee');
+
+        $totalAdditional = $fineAmount + $returnPickupFee;
+        abort_unless($totalAdditional > 0, 422, 'Tidak ada tagihan tambahan yang harus dikonfirmasi.');
+
+        $parts = [];
+        if ($fineAmount > 0) {
+            $parts[] = 'Denda Rp' . number_format($fineAmount, 0, ',', '.');
+        }
+        if ($returnPickupFee > 0) {
+            $parts[] = 'Ongkir Jemput Rp' . number_format($returnPickupFee, 0, ',', '.');
+        }
+
+        $transaction->update([
+            'notes' => ($transaction->notes ? $transaction->notes . ' | ' : '') . implode(' + ', $parts) . ' dibayar cash pada ' . now()->format('d/m/Y H:i'),
+        ]);
+
+        return back()->with('success', implode(' & ', $parts) . " untuk Rental #{$rental->rental_code} telah dikonfirmasi.");
     }
 }
