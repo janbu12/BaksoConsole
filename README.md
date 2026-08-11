@@ -1,43 +1,52 @@
-Nama Kelompok : Gupron in da house
-Nama Team : Bakso Console
-Nama Project : Bakso Console
-List Fitur :
-- Login
-- data pelanggan
-- jumlah unit
-- unit keluar
-- unit tersedia
-- booking/reservasi
-- sewa
-   - maks 5 hari
-   - pilihan sewa ps apa?
-- transaksi
-- timer penyewaan
-- bundling
-- perpanjangan waktu
-Screen capture gambar skema project dari database
-Screen recorder demo penjelasan website yang dibuat
+# 🎮 Bakso Console — Smart PlayStation Rental & Operations Hub
+> **Sistem Informasi Manajemen Rental Konsol PlayStation Terpadu & Terstandar BNSP**
 
-# Requirement
-1. Ada 2 jenis Anggota yaitu Admin dan User (anggota)
-2. Setiap User Harus Melakukan Login Untuk Dapat Mengakses Web
-3. User harus terdaftar sebagai anggota untuk meminjam / sewa unit
-4. Satu user hanya dapat memiliki satu profile
-5. Setiap user dapat mengubah profilnya masing"
-6. Nama unit dapat berjumlah lebih dari 1 (dapat dibedakan melalui kode unit)
-7. Setiap unit dapat memiliki multiple kategori
-    - kode unit tidak boleh sama
-8. Bisa melakukan pencarian unit melalui nama unit
-9. Admin dapat 
-    - menambah data unit, kategori dan user (anggota)
-    - mengupdate data unit, kategori dan user (anggota)
-    - menghapus data unit, kategori dan user (anggota)
-10. Setiap Anggota hanya dapat meminjam maksimal 2 unit
-11. Pinjaman maksimal 5 hari. Jika pinjaman lebih dari 5 hari maka akan dikenakan denda
-12. Hanya Admin yang dapat melakukan pengembalian unit, setiap anggota harus menghubungi admin jika ingin mengembalikan unit.
-13. Admin dapat melihat list unit yang dipinjam
-14. User (anggota) hanya dapat melihat list unit yang dipinjam olehnya
-15. Admin dapat melihat dan mencetak riwayat peminjaman unit dari user (anggota)
-16. Berikan validasi di setiap field yang dirasa perlu untuk melakukan sebuah validasi **required
-17. Buatlah tabel migration, sesuaikan dengan kebutuhan dari requirement project
-18. Buatlah data seed untuk kebutuhan awal project, sesuaikan dengan kebutuhan dari requirement project, contoh user admin, kategori unit, list unit
+---
+
+## 📌 Ringkasan Proyek
+- **Nama Tim**: Bakso Console
+- **Skema Sertifikasi**: Uji Kompetensi Keahlian Pemrograman Web (BNSP)
+- **Teknologi**: Laravel 11/13, Tailwind CSS, Alpine.js, Midtrans Snap API, DomPDF, Pest PHP.
+
+---
+
+## 📖 Dokumentasi Lengkap
+Seluruh dokumentasi teknis, mulai dari panduan setup, skema database, detail arsitektur, alur bisnis end-to-end, matriks kesesuaian 18 poin BNSP, hingga daftar seluruh route dapat dibaca pada file:
+👉 **[DOCUMENTATION.md](DOCUMENTATION.md)**
+
+---
+
+## 🚀 Panduan Cepat Menjalankan Aplikasi
+
+```bash
+# 1. Clone & Instalasi
+git clone https://github.com/janbu12/BaksoConsole.git
+cd BaksoConsole
+composer install
+npm install
+
+# 2. Setup Environment & Database
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+
+# 3. Jalankan Server Lokal
+npm run dev
+php artisan serve
+```
+
+Akses aplikasi di browser: **`http://localhost:8000`**
+
+---
+
+## 👥 Akun Default (Seeder)
+- **Administrator**: `admin@baksoconsole.test` | Password: `password`
+- **Member / Anggota**: `budi@example.com` | Password: `password`
+
+---
+
+## 🧪 Validasi Pengujian
+```bash
+php artisan test
+```
+*Hasil: 46 unit & feature tests lulus 100%.*
