@@ -17,6 +17,7 @@ use App\Models\Booking;
 use App\Models\Category;
 use App\Models\Combo;
 use App\Models\Delivery;
+use App\Models\Game;
 use App\Models\Rental;
 use App\Models\RentalExtension;
 use App\Models\Unit;
@@ -72,6 +73,7 @@ class PortalController extends Controller
     {
         $query = Unit::query()->with([
             'categories',
+            'games',
             'bookings' => fn ($bookings) => $bookings
                 ->whereIn('status', [BookingStatus::Pending, BookingStatus::Confirmed])
                 ->whereDate('end_date', '>=', today())
@@ -84,8 +86,13 @@ class PortalController extends Controller
         ]);
 
         if ($request->filled('q')) {
-            $query->where('name', 'like', '%'.$request->q.'%')
-                ->orWhere('code', 'like', '%'.$request->q.'%');
+            $searchTerm = $request->q;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'like', '%'.$searchTerm.'%')
+                  ->orWhere('code', 'like', '%'.$searchTerm.'%')
+                  ->orWhere('description', 'like', '%'.$searchTerm.'%')
+                  ->orWhereHas('games', fn ($g) => $g->where('name', 'like', '%'.$searchTerm.'%'));
+            });
         }
 
         if ($request->filled('players')) {
@@ -94,6 +101,14 @@ class PortalController extends Controller
 
         if ($request->filled('category')) {
             $query->whereHas('categories', fn ($c) => $c->where('categories.id', $request->category));
+        }
+
+        if ($request->filled('game')) {
+            $query->whereHas('games', fn ($g) => $g->where('games.id', $request->game));
+        }
+
+        if ($request->filled('firmware_type')) {
+            $query->where('firmware_type', $request->firmware_type);
         }
 
         $units = $query->orderBy('daily_price')->get();
@@ -108,11 +123,13 @@ class PortalController extends Controller
         );
 
         $categories = Category::orderBy('name')->get();
+        $games = Game::orderBy('name')->get();
         $combos = Combo::where('is_active', true)->get();
 
         return view('portal.catalogue', [
             'units' => $evaluatedUnits,
             'categories' => $categories,
+            'games' => $games,
             'combos' => $combos,
         ]);
     }
@@ -138,6 +155,7 @@ class PortalController extends Controller
             'delivery_method' => ['required', 'in:pickup,delivery'],
             'delivery_address' => ['required_if:delivery_method,delivery', 'nullable', 'string', 'max:500'],
             'contact_number' => ['required_if:delivery_method,delivery', 'nullable', 'string', 'max:30'],
+            'requested_games' => ['nullable', 'array'],
         ]);
 
         try {
@@ -150,7 +168,8 @@ class PortalController extends Controller
                 $data['notes'] ?? null,
                 $data['delivery_method'],
                 $data['delivery_address'] ?? null,
-                $data['contact_number'] ?? null
+                $data['contact_number'] ?? null,
+                $data['requested_games'] ?? null
             );
         } catch (\DomainException $e) {
             return back()->withInput()->withErrors(['schedule' => $e->getMessage()]);

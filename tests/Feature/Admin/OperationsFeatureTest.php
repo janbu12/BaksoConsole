@@ -73,3 +73,39 @@ it('serves all dedicated admin sidebar sub-pages correctly', function () {
     $this->actingAs($admin)->get('/admin/deliveries')->assertOk()->assertSee('Pickup & Delivery');
     $this->actingAs($admin)->get('/admin/history')->assertOk()->assertSee('Laporan Rekapitulasi');
 });
+
+it('supports auto-generated unit codes, hardware serial numbers, and installed games', function () {
+    $admin = User::factory()->create(['role' => UserRole::Admin]);
+    $game1 = \App\Models\Game::create(['name' => 'The Warriors', 'slug' => 'the-warriors', 'genre' => 'Action']);
+    $game2 = \App\Models\Game::create(['name' => "Assassin's Creed Mirage", 'slug' => 'assassins-creed-mirage', 'genre' => 'Action']);
+
+    // 1. Create unit with auto-generated code
+    $this->actingAs($admin)->post('/admin/units', [
+        'name' => 'PlayStation 5 Slim Special',
+        'code' => '', // empty, should auto-generate
+        'serial_number' => 'S01-9988776-Z',
+        'model_number' => 'CFI-2018',
+        'daily_price' => 50000,
+        'max_players' => 4,
+        'game_ids' => [$game1->id, $game2->id],
+    ])->assertRedirect();
+
+    $unit = Unit::where('serial_number', 'S01-9988776-Z')->firstOrFail();
+    expect($unit->code)->toStartWith('PS5-')
+        ->and($unit->model_number)->toBe('CFI-2018')
+        ->and($unit->games)->toHaveCount(2);
+
+    // 2. Add and delete game master
+    $this->actingAs($admin)->post('/admin/games', [
+        'name' => 'EA Sports F1 24',
+        'genre' => 'Racing',
+        'icon' => '🏎️',
+    ])->assertRedirect();
+
+    $newGame = \App\Models\Game::where('name', 'EA Sports F1 24')->firstOrFail();
+    expect($newGame->genre)->toBe('Racing');
+
+    $this->actingAs($admin)->delete("/admin/games/{$newGame->id}")->assertRedirect();
+    $this->assertDatabaseMissing('games', ['id' => $newGame->id]);
+});
+

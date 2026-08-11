@@ -29,7 +29,8 @@ class CreateBooking
         ?string $notes = null,
         string $deliveryMethod = 'pickup',
         ?string $deliveryAddress = null,
-        ?string $contactNumber = null
+        ?string $contactNumber = null,
+        ?array $requestedGames = null
     ): Rental {
         $duration = RentalDuration::days($start, $end);
         if ($duration > 5) {
@@ -38,7 +39,7 @@ class CreateBooking
 
         return DB::transaction(function () use (
             $user, $unit, $start, $end, $notes, $duration,
-            $deliveryMethod, $deliveryAddress, $contactNumber
+            $deliveryMethod, $deliveryAddress, $contactNumber, $requestedGames
         ) {
             $unit = Unit::query()->lockForUpdate()->findOrFail($unit->id);
             if (! $this->availability->check($unit, $start, $end)) {
@@ -60,6 +61,7 @@ class CreateBooking
                 'delivery_address' => $deliveryMethod === 'delivery' ? ($deliveryAddress ?: $user->profile?->address) : null,
                 'contact_number' => $deliveryMethod === 'delivery' ? ($contactNumber ?: $user->profile?->phone) : null,
                 'delivery_fee' => $fee,
+                'requested_games' => $requestedGames,
             ]);
 
             return $this->startRental->handle($user, $unit, $start, $end, $booking);

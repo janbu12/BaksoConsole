@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-#[Fillable(['booking_code', 'user_id', 'unit_id', 'start_date', 'end_date', 'duration_days', 'status', 'notes', 'delivery_method', 'delivery_address', 'contact_number', 'delivery_fee'])]
+#[Fillable(['booking_code', 'user_id', 'unit_id', 'start_date', 'end_date', 'duration_days', 'status', 'notes', 'delivery_method', 'delivery_address', 'contact_number', 'delivery_fee', 'requested_games'])]
 class Booking extends Model
 {
     public function user(): BelongsTo
@@ -33,6 +33,7 @@ class Booking extends Model
             'end_date' => 'date',
             'duration_days' => 'integer',
             'status' => BookingStatus::class,
+            'requested_games' => 'array',
         ];
     }
 }

@@ -19,6 +19,7 @@ use App\Models\Category;
 use App\Models\Combo;
 use App\Models\Delivery;
 use App\Models\Fine;
+use App\Models\Game;
 use App\Models\Rental;
 use App\Models\RentalExtension;
 use App\Models\Transaction;
@@ -46,8 +47,10 @@ class OperationsController extends Controller
     public function units(): View
     {
         return view('admin.units', [
-            'units' => Unit::with('categories')->orderBy('code')->paginate(15),
+            'units' => Unit::with(['categories', 'games'])->orderBy('code')->paginate(15),
             'categories' => Category::orderBy('name')->get(),
+            'games' => Game::orderBy('name')->get(),
+            'suggestedCode' => Unit::generateNextCode('PS5'),
         ]);
     }
 
@@ -165,16 +168,45 @@ class OperationsController extends Controller
     {
         $data = $r->validate([
             'name' => 'required|string|max:255',
-            'code' => 'required|string|unique:units',
+            'code' => 'nullable|string|max:50|unique:units,code',
+            'serial_number' => 'nullable|string|max:100',
+            'model_number' => 'nullable|string|max:100',
+            'firmware_type' => 'nullable|in:original,jailbreak',
             'daily_price' => 'required|numeric|min:0',
             'max_players' => 'required|integer|min:1|max:4',
             'description' => 'nullable|string',
             'category_id' => 'nullable|exists:categories,id',
+            'game_ids' => 'nullable|array',
+            'game_ids.*' => 'exists:games,id',
         ]);
+
+        // Auto-increment / generate code if not provided
+        $code = !empty($data['code']) ? strtoupper(trim($data['code'])) : null;
+        if (!$code) {
+            $category = !empty($data['category_id']) ? Category::find($data['category_id']) : null;
+            $prefix = 'PS5';
+            if ($category) {
+                if (stripos($category->name, 'PS4') !== false || stripos($category->name, 'PlayStation 4') !== false) {
+                    $prefix = 'PS4';
+                } elseif (stripos($category->name, 'PS5') !== false || stripos($category->name, 'PlayStation 5') !== false) {
+                    $prefix = 'PS5';
+                } else {
+                    $prefix = strtoupper(substr(preg_replace('/[^a-zA-Z0-9]/', '', $category->name), 0, 3)) ?: 'UNT';
+                }
+            } elseif (stripos($data['name'], 'PS4') !== false || stripos($data['name'], 'PlayStation 4') !== false) {
+                $prefix = 'PS4';
+            } elseif (stripos($data['name'], 'PS5') !== false || stripos($data['name'], 'PlayStation 5') !== false) {
+                $prefix = 'PS5';
+            }
+            $code = Unit::generateNextCode($prefix);
+        }
 
         $unit = Unit::create([
             'name' => $data['name'],
-            'code' => strtoupper($data['code']),
+            'code' => $code,
+            'serial_number' => $data['serial_number'] ?? null,
+            'model_number' => $data['model_number'] ?? null,
+            'firmware_type' => $data['firmware_type'] ?? 'original',
             'daily_price' => $data['daily_price'],
             'max_players' => $data['max_players'],
             'description' => $data['description'] ?? null,
@@ -185,6 +217,10 @@ class OperationsController extends Controller
             $unit->categories()->sync([$data['category_id']]);
         }
 
+        if (!empty($data['game_ids'])) {
+            $unit->games()->sync($data['game_ids']);
+        }
+
         return back()->with('success', "Unit konsol {$unit->name} ({$unit->code}) berhasil ditambahkan!");
     }
 
@@ -192,12 +228,22 @@ class OperationsController extends Controller
     {
         $data = $r->validate([
             'name' => 'required|string',
+            'serial_number' => 'nullable|string|max:100',
+            'model_number' => 'nullable|string|max:100',
+            'firmware_type' => 'nullable|in:original,jailbreak',
             'daily_price' => 'required|numeric',
             'max_players' => 'required|integer',
+            'description' => 'nullable|string',
             'status' => 'required|string',
+            'game_ids' => 'nullable|array',
+            'game_ids.*' => 'exists:games,id',
         ]);
 
-        $unit->update($data);
+        $unit->update(collect($data)->except(['game_ids'])->all());
+
+        if (isset($data['game_ids'])) {
+            $unit->games()->sync($data['game_ids']);
+        }
 
         return back()->with('success', "Data unit {$unit->code} diperbarui.");
     }
@@ -227,6 +273,33 @@ class OperationsController extends Controller
         ]);
 
         return back()->with('success', 'Kategori baru berhasil ditambahkan.');
+    }
+
+    public function storeGame(Request $r): RedirectResponse
+    {
+        $data = $r->validate([
+            'name' => 'required|string|max:255|unique:games,name',
+            'genre' => 'nullable|string|max:100',
+            'icon' => 'nullable|string|max:10',
+            'description' => 'nullable|string',
+        ]);
+
+        Game::create([
+            'name' => $data['name'],
+            'slug' => Str::slug($data['name']),
+            'genre' => $data['genre'] ?? 'Action',
+            'icon' => $data['icon'] ?: '🎮',
+            'description' => $data['description'] ?? null,
+        ]);
+
+        return back()->with('success', "Game {$data['name']} berhasil ditambahkan ke master game!");
+    }
+
+    public function destroyGame(Game $game): RedirectResponse
+    {
+        $game->delete();
+
+        return back()->with('success', "Game {$game->name} berhasil dihapus.");
     }
 
     public function storeCombo(Request $r): RedirectResponse

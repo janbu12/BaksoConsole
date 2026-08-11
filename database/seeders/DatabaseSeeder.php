@@ -18,6 +18,7 @@ use App\Models\Category;
 use App\Models\Combo;
 use App\Models\Delivery;
 use App\Models\Fine;
+use App\Models\Game;
 use App\Models\Rental;
 use App\Models\RentalExtension;
 use App\Models\Transaction;
@@ -65,26 +66,138 @@ class DatabaseSeeder extends Seeder
             return [$name => Category::updateOrCreate(['slug' => str($name)->slug()], ['name' => $name, 'description' => "Kategori game & unit $name"])];
         });
 
-        // 3. Seed Units
+        // 3. Seed Master Games
+        $gamesData = [
+            ['name' => "Assassin's Creed Mirage", 'genre' => 'Action-Adventure', 'icon' => '🗡️', 'desc' => 'Petualangan stealth aksi di Baghdad abad ke-9'],
+            ['name' => 'The Warriors', 'genre' => 'Action Brawler', 'icon' => '🥊', 'desc' => 'Game petarung jalanan legendaris multiplayer mabar'],
+            ['name' => 'EA Sports F1 24', 'genre' => 'Racing Sim', 'icon' => '🏎️', 'desc' => 'Balapan Formula 1 resmi grafis ultra realistis 4K 60FPS'],
+            ['name' => 'eFootball 2024', 'genre' => 'Sports', 'icon' => '⚽', 'desc' => 'Kompetisi sepak bola multiplayer mabar terfavorit'],
+            ['name' => 'Grand Theft Auto V', 'genre' => 'Open World', 'icon' => '🚗', 'desc' => 'Dunia Los Santos bebas dengan grafis PS5 Enhanced'],
+            ['name' => 'God of War Ragnarök', 'genre' => 'Action RPG', 'icon' => '🪓', 'desc' => 'Petualangan Kratos & Atreus menaklukkan 9 alam mitologi Nordik'],
+            ['name' => 'Tekken 8', 'genre' => 'Fighting', 'icon' => '🥋', 'desc' => 'Game pertarungan visual Unreal Engine 5 duel vs teman'],
+            ['name' => "Marvel's Spider-Man 2", 'genre' => 'Action', 'icon' => '🕸️', 'desc' => 'Aksi Peter Parker & Miles Morales berayun di New York'],
+        ];
+
+        $games = collect($gamesData)->mapWithKeys(function ($g) {
+            return [$g['name'] => Game::updateOrCreate(
+                ['slug' => str($g['name'])->slug()],
+                ['name' => $g['name'], 'genre' => $g['genre'], 'icon' => $g['icon'], 'description' => $g['desc']]
+            )];
+        });
+
+        // 4. Seed Units with Serial Numbers & Model Numbers & Installed Games
         $unitsData = [
-            ['PlayStation 5', 'PS5-001', 50000, 4, UnitStatus::Available, ['PlayStation 5', 'Multiplayer', 'Mabar']],
-            ['PlayStation 5', 'PS5-002', 50000, 4, UnitStatus::Rented, ['PlayStation 5', 'Multiplayer', 'Mabar']],
-            ['PlayStation 5', 'PS5-003', 50000, 4, UnitStatus::Booked, ['PlayStation 5', 'Multiplayer', 'Family', 'Mabar']],
-            ['PlayStation 5', 'PS5-004', 50000, 4, UnitStatus::Available, ['PlayStation 5', 'Action & RPG', 'Single Player']],
-            ['PlayStation 4', 'PS4-001', 35000, 4, UnitStatus::Available, ['PlayStation 4', 'Multiplayer', 'Mabar', 'Family']],
-            ['PlayStation 4', 'PS4-002', 35000, 2, UnitStatus::Available, ['PlayStation 4', 'Family']],
-            ['PlayStation 4', 'PS4-003', 35000, 4, UnitStatus::Maintenance, ['PlayStation 4', 'Multiplayer']],
+            [
+                'name' => 'PlayStation 5 Disc Edition (Online Ready)',
+                'code' => 'PS5-001',
+                'sn' => 'S01-7489210-E',
+                'model' => 'CFI-1218A',
+                'firmware' => \App\Enums\FirmwareType::Original,
+                'price' => 50000,
+                'players' => 4,
+                'status' => UnitStatus::Available,
+                'cats' => ['PlayStation 5', 'Multiplayer', 'Mabar'],
+                'installed_games' => ["Assassin's Creed Mirage", 'EA Sports F1 24', 'eFootball 2024', 'Tekken 8'],
+            ],
+            [
+                'name' => 'PlayStation 5 Slim Edition (Online Ready)',
+                'code' => 'PS5-002',
+                'sn' => 'S01-8392011-F',
+                'model' => 'CFI-2018 (Slim)',
+                'firmware' => \App\Enums\FirmwareType::Original,
+                'price' => 50000,
+                'players' => 4,
+                'status' => UnitStatus::Rented,
+                'cats' => ['PlayStation 5', 'Multiplayer', 'Mabar'],
+                'installed_games' => ['God of War Ragnarök', "Marvel's Spider-Man 2", 'Grand Theft Auto V'],
+            ],
+            [
+                'name' => 'PlayStation 5 Digital Edition (Jailbreak)',
+                'code' => 'PS5-003',
+                'sn' => 'S01-9920194-A',
+                'model' => 'CFI-1218B',
+                'firmware' => \App\Enums\FirmwareType::Jailbreak,
+                'price' => 45000,
+                'players' => 4,
+                'status' => UnitStatus::Booked,
+                'cats' => ['PlayStation 5', 'Multiplayer', 'Family', 'Mabar'],
+                'installed_games' => ['The Warriors', 'eFootball 2024', 'Tekken 8', 'Grand Theft Auto V'],
+            ],
+            [
+                'name' => 'PlayStation 5 Slim Edition (Online Ready)',
+                'code' => 'PS5-004',
+                'sn' => 'S01-5529103-C',
+                'model' => 'CFI-2018 (Slim)',
+                'firmware' => \App\Enums\FirmwareType::Original,
+                'price' => 50000,
+                'players' => 4,
+                'status' => UnitStatus::Available,
+                'cats' => ['PlayStation 5', 'Action & RPG'],
+                'installed_games' => ["Assassin's Creed Mirage", 'Grand Theft Auto V', 'EA Sports F1 24'],
+            ],
+            [
+                'name' => 'PlayStation 4 Slim 1TB (Jailbreak 250+ Game)',
+                'code' => 'PS4-001',
+                'sn' => 'FC8291039481',
+                'model' => 'CUH-2218B',
+                'firmware' => \App\Enums\FirmwareType::Jailbreak,
+                'price' => 30000,
+                'players' => 4,
+                'status' => UnitStatus::Available,
+                'cats' => ['PlayStation 4', 'Multiplayer', 'Mabar', 'Family'],
+                'installed_games' => ['The Warriors', 'Grand Theft Auto V', 'eFootball 2024', 'Tekken 8'],
+            ],
+            [
+                'name' => 'PlayStation 4 Slim 500GB (Online Ready)',
+                'code' => 'PS4-002',
+                'sn' => 'FC9910482012',
+                'model' => 'CUH-2218A',
+                'firmware' => \App\Enums\FirmwareType::Original,
+                'price' => 35000,
+                'players' => 2,
+                'status' => UnitStatus::Available,
+                'cats' => ['PlayStation 4', 'Family'],
+                'installed_games' => ['Tekken 8', "Assassin's Creed Mirage"],
+            ],
+            [
+                'name' => 'PlayStation 4 Pro 4K HDR (Jailbreak)',
+                'code' => 'PS4-003',
+                'sn' => 'FC3392019482',
+                'model' => 'CUH-7218B (Pro)',
+                'firmware' => \App\Enums\FirmwareType::Jailbreak,
+                'price' => 35000,
+                'players' => 4,
+                'status' => UnitStatus::Maintenance,
+                'cats' => ['PlayStation 4', 'Multiplayer'],
+                'installed_games' => ['God of War Ragnarök', 'EA Sports F1 24', 'Grand Theft Auto V'],
+            ],
         ];
 
         $createdUnits = [];
-        foreach ($unitsData as [$name, $code, $price, $players, $status, $cats]) {
+        foreach ($unitsData as $data) {
             $unit = Unit::updateOrCreate(
-                ['code' => $code],
-                ['name' => $name, 'daily_price' => $price, 'max_players' => $players, 'status' => $status]
+                ['code' => $data['code']],
+                [
+                    'name' => $data['name'],
+                    'serial_number' => $data['sn'],
+                    'model_number' => $data['model'],
+                    'firmware_type' => $data['firmware'],
+                    'daily_price' => $data['price'],
+                    'max_players' => $data['players'],
+                    'status' => $data['status'],
+                    'description' => "Include 2 Controller + Kabel HDMI + Power + " . count($data['installed_games']) . " Game Terpasang",
+                ]
             );
-            $syncIds = collect($cats)->map(fn ($c) => $categories[$c]->id ?? null)->filter()->all();
-            $unit->categories()->sync($syncIds);
-            $createdUnits[$code] = $unit;
+
+            // Sync categories
+            $syncCategoryIds = collect($data['cats'])->map(fn ($c) => $categories[$c]->id ?? null)->filter()->all();
+            $unit->categories()->sync($syncCategoryIds);
+
+            // Sync games
+            $syncGameIds = collect($data['installed_games'])->map(fn ($g) => $games[$g]->id ?? null)->filter()->all();
+            $unit->games()->sync($syncGameIds);
+
+            $createdUnits[$data['code']] = $unit;
         }
 
         // 4. Seed Combos

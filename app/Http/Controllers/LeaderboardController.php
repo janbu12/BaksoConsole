@@ -37,7 +37,6 @@ class LeaderboardController extends Controller
 
     public function adminIndex()
     {
-        // Admin might want to see more members, e.g. top 50
         $topMembers = $this->getTopMembers(50);
         
         return view('admin.leaderboard', compact('topMembers'));

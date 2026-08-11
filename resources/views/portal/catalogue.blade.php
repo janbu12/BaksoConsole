@@ -38,18 +38,39 @@
                     <p class="text-xs text-slate-400">Masukkan preferensi Anda dan sistem akan menghitung unit terbaik.</p>
                 </div>
             </div>
-            @if(request()->anyFilled(['q', 'players', 'duration', 'budget', 'category']))
+            @if(request()->anyFilled(['q', 'players', 'duration', 'budget', 'category', 'game', 'firmware_type']))
                 <a href="{{ route('catalogue') }}" class="text-xs font-bold text-red-400 hover:underline">
                     &times; Reset Filter
                 </a>
             @endif
         </div>
 
-        <form method="GET" action="{{ route('catalogue') }}" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-            <!-- Search Name -->
+        <form method="GET" action="{{ route('catalogue') }}" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-7">
+            <!-- Search Name / Game -->
             <div>
-                <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Nama Konsol</label>
-                <input name="q" value="{{ request('q') }}" placeholder="Cari misal: PS5, PS4..." class="w-full rounded-xl border border-white/10 bg-slate-950 px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:border-orange-500 focus:outline-none">
+                <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Cari Unit / Game</label>
+                <input name="q" value="{{ request('q') }}" placeholder="Misal: PS5, Assassin, F1..." class="w-full rounded-xl border border-white/10 bg-slate-950 px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:border-orange-500 focus:outline-none">
+            </div>
+
+            <!-- Tipe Sistem / Firmware Filter -->
+            <div>
+                <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Tipe Sistem</label>
+                <select name="firmware_type" class="w-full rounded-xl border border-white/10 bg-slate-950 px-3.5 py-2.5 text-xs text-white focus:border-orange-500 focus:outline-none">
+                    <option value="">Semua Sistem</option>
+                    <option value="original" @selected(request('firmware_type') === 'original')>🌐 Original (Bisa Online)</option>
+                    <option value="jailbreak" @selected(request('firmware_type') === 'jailbreak')>💾 Jailbreak (Full Offline)</option>
+                </select>
+            </div>
+
+            <!-- Game Filter -->
+            <div>
+                <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Game Terpasang</label>
+                <select name="game" class="w-full rounded-xl border border-white/10 bg-slate-950 px-3.5 py-2.5 text-xs text-white focus:border-orange-500 focus:outline-none">
+                    <option value="">Semua Game</option>
+                    @foreach($games as $g)
+                        <option value="{{ $g->id }}" @selected(request('game') == $g->id)>{{ $g->icon ?? '🎮' }} {{ $g->name }}</option>
+                    @endforeach
+                </select>
             </div>
 
             <!-- Players -->
@@ -131,11 +152,16 @@
                     @endif
 
                     <div>
-                        <!-- Header Unit: Code & Live Availability Badge (Selling Point #4) -->
-                        <div class="flex items-center justify-between">
-                            <span class="font-mono text-xs font-bold uppercase tracking-wider text-orange-400 bg-orange-500/10 px-2.5 py-1 rounded-lg border border-orange-500/20">
-                                {{ $unit->code }}
-                            </span>
+                        <!-- Header Unit: Code & Firmware & Live Availability Badge -->
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-mono text-xs font-bold uppercase tracking-wider text-orange-400 bg-orange-500/10 px-2.5 py-1 rounded-lg border border-orange-500/20">
+                                    {{ $unit->code }}
+                                </span>
+                                <span class="rounded-lg px-2 py-1 text-[10px] font-bold uppercase {{ $unit->firmware_type?->value === 'jailbreak' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-blue-500/20 text-blue-300 border border-blue-500/30' }}">
+                                    {{ $unit->firmware_type?->value === 'jailbreak' ? '💾 Jailbreak' : '🌐 Online Ready' }}
+                                </span>
+                            </div>
 
                             @if($unit->status->value === 'available')
                                 <span class="flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs font-bold text-emerald-400">
@@ -178,13 +204,38 @@
                             </div>
                         @endif
 
-                        <!-- Categories -->
-                        <div class="mt-3 flex flex-wrap gap-1.5">
+                        <!-- Categories & Hardware Model -->
+                        <div class="mt-3 flex flex-wrap items-center gap-1.5">
                             @foreach($unit->categories as $category)
                                 <span class="rounded-lg bg-white/5 px-2.5 py-1 text-[11px] font-medium text-slate-300 border border-white/5">
                                     {{ $category->name }}
                                 </span>
                             @endforeach
+                            @if($unit->model_number)
+                                <span class="rounded-lg bg-slate-800/80 px-2 py-1 text-[10px] font-mono text-slate-400 border border-white/5">
+                                    Model: {{ $unit->model_number }}
+                                </span>
+                            @endif
+                        </div>
+
+                        <!-- Game Terpasang (Pre-installed Games) -->
+                        <div class="mt-4 pt-3 border-t border-white/5">
+                            <div class="flex items-center justify-between text-[11px] text-slate-400 font-bold uppercase tracking-wider mb-2">
+                                <span><i class="fa-solid fa-gamepad text-orange-400 mr-1"></i> Game Terpasang:</span>
+                                <span class="text-[10px] font-normal lowercase text-slate-500">({{ $unit->games->count() }} game)</span>
+                            </div>
+                            @if($unit->games->isNotEmpty())
+                                <div class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto scrollbar-thin">
+                                    @foreach($unit->games as $game)
+                                        <span class="inline-flex items-center gap-1 rounded-lg bg-orange-500/10 border border-orange-500/20 px-2 py-1 text-[11px] font-semibold text-orange-300 hover:bg-orange-500/20 transition">
+                                            <span>{{ $game->icon ?? '🎮' }}</span>
+                                            <span>{{ $game->name }}</span>
+                                        </span>
+                                    @endforeach
+                                </div>
+                            @else
+                                <p class="text-[11px] text-slate-500 italic">Game pre-installed siap request saat sewa.</p>
+                            @endif
                         </div>
 
                         <!-- Price Info -->
@@ -253,6 +304,36 @@
                                                 </div>
                                             </div>
                                         </template>
+
+                                        <!-- Conditional Game Selection based on Firmware Status -->
+                                        @if(($unit->firmware_type?->value ?? 'original') === 'original')
+                                            <div>
+                                                <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1 flex items-center justify-between">
+                                                    <span><i class="fa-solid fa-gamepad text-orange-400"></i> Pilih Game yang Diinginkan:</span>
+                                                    <span class="text-[9px] text-blue-400 lowercase font-normal">🌐 online multiplayer ready</span>
+                                                </label>
+                                                <div class="max-h-28 overflow-y-auto rounded-lg border border-white/10 bg-slate-900 p-2 space-y-1.5 scrollbar-thin">
+                                                    @forelse($unit->games as $game)
+                                                        <label class="flex items-center gap-2 text-xs text-slate-300 hover:text-white cursor-pointer">
+                                                            <input type="checkbox" name="requested_games[]" value="{{ $game->name }}" checked class="rounded border-white/20 bg-slate-950 text-orange-500 focus:ring-orange-500">
+                                                            <span>{{ $game->icon ?? '🎮' }} {{ $game->name }}</span>
+                                                            <span class="text-[9px] text-slate-500 ml-auto">{{ $game->genre ?? '' }}</span>
+                                                        </label>
+                                                    @empty
+                                                        <p class="text-[10px] text-slate-500 italic">Game siap request di catatan sewa</p>
+                                                    @endforelse
+                                                </div>
+                                            </div>
+                                        @else
+                                            <div class="rounded-xl border border-purple-500/30 bg-purple-500/10 p-2.5 text-xs text-purple-200">
+                                                <div class="font-bold flex items-center gap-1.5 text-purple-300 text-[11px]">
+                                                    <span>💾</span> Paket Full 200+ Game Lengkap
+                                                </div>
+                                                <p class="text-[10px] text-purple-300/80 mt-0.5 leading-relaxed">
+                                                    Unit sudah terisi 200+ game lengkap (The Warriors, GTA V, dll) siap main offline tanpa perlu koneksi/kuota internet.
+                                                </p>
+                                            </div>
+                                        @endif
 
                                         <div>
                                             <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Catatan Tambahan (Opsional)</label>

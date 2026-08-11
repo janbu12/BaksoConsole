@@ -163,12 +163,35 @@
                             </b>
                         </div>
                         @if($rental->transaction?->status->value === 'pending')
-                            <form method="POST" action="/rentals/{{ $rental->id }}/pay" class="mt-2">
-                                @csrf
-                                <button type="submit" class="w-full rounded-lg bg-orange-500 py-1.5 text-[10px] font-bold text-white hover:bg-orange-600 transition">
-                                    Simulasi Bayar Lunas
-                                </button>
-                            </form>
+                            @php
+                                $midtransEnabled = !empty(config('services.midtrans.server_key'));
+                            @endphp
+
+                            <div class="mt-2.5 space-y-1.5">
+                                @if($midtransEnabled)
+                                    <form method="POST" action="/rentals/{{ $rental->id }}/pay">
+                                        @csrf
+                                        <button type="submit" class="w-full flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-2 text-[11px] font-bold text-white shadow-md shadow-blue-500/20 hover:brightness-110 transition">
+                                            <i class="fa-solid fa-credit-card"></i> Bayar via Midtrans (Online)
+                                        </button>
+                                    </form>
+
+                                    <form method="POST" action="/rentals/{{ $rental->id }}/simulate-pay">
+                                        @csrf
+                                        <button type="submit" class="w-full flex items-center justify-center gap-1 rounded-lg border border-white/10 bg-slate-900 py-1 text-[10px] font-semibold text-slate-300 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition">
+                                            <span>⚡</span> Mode Simulasi Bayar
+                                        </button>
+                                    </form>
+                                @else
+                                    <form method="POST" action="/rentals/{{ $rental->id }}/simulate-pay">
+                                        @csrf
+                                        <button type="submit" class="w-full flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 py-2 text-[11px] font-bold text-white shadow-md shadow-orange-500/20 hover:brightness-110 transition">
+                                            <span>⚡</span> Simulasi Bayar Lunas
+                                        </button>
+                                    </form>
+                                    <span class="block text-center text-[9px] text-slate-500">Mode Simulasi (Midtrans Key Belum Terisi)</span>
+                                @endif
+                            </div>
                         @endif
                         @if($rental->transaction)
                             <a href="{{ route('rentals.invoice.download', $rental) }}" class="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 py-1.5 text-[10px] font-bold text-slate-200 transition hover:border-orange-500/40 hover:text-orange-300">

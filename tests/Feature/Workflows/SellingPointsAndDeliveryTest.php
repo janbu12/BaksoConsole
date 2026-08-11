@@ -8,6 +8,7 @@ use App\Enums\DeliveryStatus;
 use App\Enums\DeliveryType;
 use App\Enums\UnitStatus;
 use App\Enums\UserRole;
+use App\Models\Booking;
 use App\Models\Category;
 use App\Models\Combo;
 use App\Models\Delivery;
@@ -131,3 +132,51 @@ it('aggregates heatmap data and peak rental period correctly in admin insight', 
     expect($query['peakDay']->start_date->toDateString())->toBe('2026-08-10')
         ->and($query['peakDay']->total)->toBe(2);
 });
+
+it('supports firmware type filtering (Original vs Jailbreak) and saving requested games on booking', function () {
+    $user = User::factory()->create();
+    $game = \App\Models\Game::create(['name' => 'The Warriors', 'slug' => 'the-warriors', 'genre' => 'Action']);
+
+    $unitOriginal = Unit::create([
+        'name' => 'PS5 Online',
+        'code' => 'PS5-ONL',
+        'firmware_type' => \App\Enums\FirmwareType::Original,
+        'daily_price' => 50000,
+        'max_players' => 4,
+        'status' => UnitStatus::Available,
+    ]);
+    $unitOriginal->games()->sync([$game->id]);
+
+    $unitJailbreak = Unit::create([
+        'name' => 'PS4 Jailbreak',
+        'code' => 'PS4-JBK',
+        'firmware_type' => \App\Enums\FirmwareType::Jailbreak,
+        'daily_price' => 30000,
+        'max_players' => 4,
+        'status' => UnitStatus::Available,
+    ]);
+
+    // 1. Test catalogue filter by firmware_type
+    $this->actingAs($user)->get('/catalogue?firmware_type=original')
+        ->assertOk()
+        ->assertSee('PS5-ONL')
+        ->assertDontSee('PS4-JBK');
+
+    $this->actingAs($user)->get('/catalogue?firmware_type=jailbreak')
+        ->assertOk()
+        ->assertSee('PS4-JBK')
+        ->assertDontSee('PS5-ONL');
+
+    // 2. Test booking with requested_games
+    $this->actingAs($user)->post('/bookings', [
+        'unit_id' => $unitOriginal->id,
+        'start_date' => today()->toDateString(),
+        'end_date' => today()->addDays(2)->toDateString(),
+        'delivery_method' => 'pickup',
+        'requested_games' => ['The Warriors'],
+    ])->assertRedirect('/rentals');
+
+    $booking = Booking::where('unit_id', $unitOriginal->id)->latest()->firstOrFail();
+    expect($booking->requested_games)->toContain('The Warriors');
+});
+

@@ -39,7 +39,7 @@
                     <span>Katalog & SmartPick</span>
                 </a>
                 @auth
-                    @if(auth()->user()->role->value === 'user')
+                    @if((auth()->user()->role?->value ?? 'user') === 'user')
                         <a href="{{ route('bookings') }}" class="inline-flex items-center gap-2 rounded-lg px-3.5 py-2 transition hover:bg-white/5 hover:text-white {{ request()->routeIs('bookings') ? 'bg-orange-500/10 text-orange-400 font-semibold' : '' }}">
                             <i class="fa-solid fa-calendar-days text-xs"></i>
                             <span>Booking Saya</span>
@@ -58,7 +58,7 @@
                         </a>
                     @endif
 
-                    @if(auth()->user()->role->value === 'admin')
+                    @if((auth()->user()->role?->value ?? '') === 'admin')
                         <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center gap-2 rounded-lg bg-orange-500/20 px-3.5 py-2 text-orange-400 font-semibold border border-orange-500/30 transition hover:bg-orange-500 hover:text-white">
                             <i class="fa-solid fa-bolt text-xs"></i>
                             <span>Admin Operations Hub</span>
@@ -81,7 +81,7 @@
                             @endif
                             <div class="hidden text-left sm:block">
                                 <div class="text-xs font-bold text-white leading-none">{{ auth()->user()->name }}</div>
-                                <div class="text-[10px] text-slate-400 capitalize">{{ auth()->user()->role->value }}</div>
+                                <div class="text-[10px] text-slate-400 capitalize">{{ auth()->user()->role?->value ?? 'Member' }}</div>
                             </div>
                         </a>
 

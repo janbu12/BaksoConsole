@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LeaderboardController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PortalController;
 use App\Models\Category;
 use App\Models\Combo;
@@ -51,7 +52,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/rentals', [PortalController::class, 'rentals'])->name('rentals');
     Route::post('/rentals/{rental}/extensions', [PortalController::class, 'extension']);
     Route::post('/rentals/{rental}/deliveries', [PortalController::class, 'delivery']);
-    Route::post('/rentals/{rental}/pay', [PortalController::class, 'simulatePayment']);
+    Route::post('/rentals/{rental}/pay', [PaymentController::class, 'pay'])->name('rentals.pay');
+    Route::post('/rentals/{rental}/simulate-pay', [PaymentController::class, 'simulate'])->name('rentals.pay.simulate');
     Route::get('/rentals/{rental}/invoice', [InvoiceController::class, 'download'])->name('rentals.invoice.download');
     Route::get('/history', [PortalController::class, 'history'])->name('history');
     Route::get('/profile', [PortalController::class, 'profile'])->name('profile');
@@ -59,6 +61,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/avatar', [PortalController::class, 'updateAvatar']);
     Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard');
 });
+
+// Midtrans Webhook Callback & Return URLs
+Route::post('/midtrans/notification', [PaymentController::class, 'notification'])->name('midtrans.notification');
+Route::post('/midtrans/callback', [PaymentController::class, 'notification']);
+Route::get('/midtrans/finish', [PaymentController::class, 'finish'])->name('midtrans.finish');
+Route::get('/midtrans/unfinish', [PaymentController::class, 'unfinish'])->name('midtrans.unfinish');
+Route::get('/midtrans/error', [PaymentController::class, 'error'])->name('midtrans.error');
 
 Route::get('/catalogue', [PortalController::class, 'catalogue'])->name('catalogue');
 
@@ -82,6 +91,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 
     Route::post('/categories', [OperationsController::class, 'storeCategory']);
     Route::delete('/categories/{category}', [OperationsController::class, 'destroyCategory']);
+
+    Route::post('/games', [OperationsController::class, 'storeGame']);
+    Route::delete('/games/{game}', [OperationsController::class, 'destroyGame']);
 
     Route::post('/combos', [OperationsController::class, 'storeCombo']);
     Route::delete('/combos/{combo}', [OperationsController::class, 'destroyCombo']);

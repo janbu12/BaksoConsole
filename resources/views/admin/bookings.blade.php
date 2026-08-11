@@ -21,6 +21,9 @@
                             <div class="space-y-1">
                                 <div class="flex items-center gap-2">
                                     <span class="font-mono font-bold text-orange-400 text-sm">#{{ $rental->rental_code }}</span>
+                                    <span class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase {{ $rental->unit->firmware_type?->value === 'jailbreak' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-blue-500/20 text-blue-300 border border-blue-500/30' }}">
+                                        {{ $rental->unit->firmware_type?->value === 'jailbreak' ? '💾 Jailbreak' : '🌐 Online Ready' }}
+                                    </span>
                                     <span class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
                                         {{ $rental->status->value }}
                                     </span>
@@ -33,6 +36,14 @@
                                     <i class="fa-solid fa-gamepad"></i> <span class="font-semibold">{{ $rental->unit->name }}</span> ({{ $rental->unit->code }}) &middot;
                                     <i class="fa-solid fa-hourglass-half"></i> <span class="text-amber-400 font-semibold">{{ $rental->duration_days }} Hari</span> ({{ $rental->start_date->format('d M') }} &ndash; {{ $rental->due_date->format('d M Y') }})
                                 </div>
+                                @if($rental->booking && !empty($rental->booking->requested_games))
+                                    <div class="text-[11px] text-orange-300 flex items-center gap-1.5 flex-wrap mt-0.5">
+                                        <span class="font-bold text-slate-400">🎮 Game Dipilih:</span>
+                                        @foreach($rental->booking->requested_games as $rg)
+                                            <span class="bg-orange-500/10 border border-orange-500/20 rounded px-1.5 py-0.2 text-[10px]">{{ $rg }}</span>
+                                        @endforeach
+                                    </div>
+                                @endif
                                 @if($rental->booking && $rental->booking->notes)
                                     <div class="text-[11px] text-slate-400 italic">"{{ $rental->booking->notes }}"</div>
                                 @endif
